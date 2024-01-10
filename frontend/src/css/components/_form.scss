@@ -1,0 +1,110 @@
+.job-info-wrp {
+  background: #f1faff;
+  padding: 15px !important;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px dashed #009ef7 !important;
+  font-weight: 600;
+}
+
+.q-btn.q-btn-item:not(.q-btn--round) {
+  border-radius: 0.475rem;
+}
+
+.q-btn-group.q-btn-dropdown--split {
+  border-radius: 0.475rem;
+
+  .q-btn.q-btn-item:not(.q-btn--round):not(:first-child):not(:last-child) {
+    border-radius: 0px;
+  }
+  .q-btn.q-btn-item:not(.q-btn--round):first-child {
+    border-radius: 0.475rem 0 0 0.475rem;
+    padding: 0 8px;
+  }
+  .q-btn.q-btn-item:not(.q-btn--round):last-child {
+    border-radius: 0 0.475rem 0.475rem 0;
+    .q-btn__wrapper {
+      min-width: unset;
+    }
+  }
+}
+
+.q-field.q-file,
+.q-field.q-textarea,
+.q-field.q-select,
+.q-field.q-input {
+  background-color: #efefef;
+  color: #5e6278;
+  padding: 5px 15px;
+  margin: 20px 0;
+  border: 0;
+  border-radius: 10px;
+  input {
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+}
+
+.q-dialog {
+  .global-dialog,
+  .popup-dialog {
+    label {
+      margin-bottom: 10px;
+    }
+  }
+
+  .q-dialog__inner--minimized {
+    .global-dialog {
+      height: fit-content;
+      max-height: calc(100vh - 48px) !important;
+    }
+  }
+}
+
+.q-field--float .q-field__label {
+  top: 9px;
+}
+
+.q-field--standard .q-field__control:before {
+  border-bottom: 0 !important;
+}
+.q-field--filled .q-field__control,
+.q-field--filled .q-field__control:after,
+.q-field--standard .q-field__control:after {
+  background: transparent !important;
+}
+
+.q-field--filled .q-field__control:before {
+  background: transparent !important;
+  border-bottom: 0 !important;
+}
+
+.q-field--filled.q-field--focused .q-field__control:before {
+  background: transparent !important;
+  border-bottom: 0 !important;
+}
+.q-field--filled .q-field__control {
+  padding: 0 !important;
+}
+
+.add-customer-fields {
+  .q-field {
+    background: #fff;
+  }
+}
+
+.form_wrp {
+  label {
+    margin-bottom: 10px;
+  }
+}
+.q-field--float .q-field__label {
+  top: -5px;
+  background: #e0e0e0;
+  display: inline-block;
+  width: auto;
+  right: auto;
+  padding: 2px 10px;
+  border-radius: 5px;
+}

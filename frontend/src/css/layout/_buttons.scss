@@ -1,0 +1,41 @@
+.primary_btn,
+.warning_btn,
+.negative_btn,
+.cancel_btn,
+.third_btn,
+.fourth_btn,
+.secondary_btn,
+.active_btn,
+.deactivate_btn{
+  color: #fff!important;
+  font-size: 14px;
+}
+.primary_btn{
+  background: #29b6f6
+}
+.warning_btn{
+  background: #f9c336!important;
+}
+.negative_btn{
+  background: #EE5564 !important;
+}
+.secondary_btn{
+  background: #20abab !important;
+}
+.third_btn{
+  background: #6347b7 !important;
+}
+.fourth_btn{
+  background: #d05c5c !important;
+}
+.cancel_btn{
+  background: #ffffff!important;
+  color: #7e8299!important;
+}
+
+.active_btn{
+  background: #66bb6a;
+}
+.deactivate_btn{
+  background:#90a4ae ;
+}

@@ -1,0 +1,38 @@
+.alertDialog {
+  .q-dialog__title {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 20px;
+    background: #f1f1f1;
+  }
+  .q-dialog__message {
+    padding: 20px !important;
+    margin: 0;
+  }
+  .q-card__actions {
+    border-top: 1px solid #e0e0e0;
+    background: #f1f1f1;
+    button {
+      color: $grey-7 !important;
+      padding: 0 15px;
+    }
+    button:nth-of-type(2) {
+      background: $light-blue-5 !important;
+      color: #fff !important;
+    }
+  }
+}
+
+.dialog_bottom,
+.dialog_header {
+  background: #f1f1f1;
+}
+
+.dialog_header {
+  color: #000 !important;
+  .text-h6 {
+    color: #000 !important;
+  }
+  .close_icon {
+    background: #e8e8e8;
+  }
+}

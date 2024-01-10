@@ -35,8 +35,8 @@ class TestNoel extends Command
         try {
             // Create Product
             $product = Product::create([
-                'name' => 'Test Product',
-                'slug' => Str::slug('Test Product'),
+                'name' => 'Test Product 2',
+                'slug' => Str::slug('Test Product 2'),
                 'description' => 'Test Description'
             ]);
 
@@ -70,8 +70,8 @@ class TestNoel extends Command
             // Attach SKU to attribute options
 
 
-            DB::rollBack();
-//            DB::commit();
+//            DB::rollBack();
+            DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             dump($e->getMessage());
