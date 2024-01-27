@@ -61,6 +61,7 @@ module.exports = configure(function (/* ctx */) {
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
+      env: require("dotenv").config({ path: __dirname + "/.env" }).parsed,
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,

@@ -1,52 +1,3 @@
-<script setup>
-
-import TableSkeleton from "components/skeleton/TableSkeleton.vue";
-import {ref} from "vue";
-
-const loading = ref(false)
-const productAttributeFormRef = ref(null)
-const showProductAttributeFormDialog = ref(false)
-const filter = ref('')
-const headerTitle = ref('Add Product')
-
-const columns = [
-  { name: 'name', align: 'left', label: 'Name', field: 'name', sortable: true },
-  { name: 'description', align: 'left', label: 'Description', field: 'description', sortable: false },
-]
-
-const rows = [
-  {
-    name: 'Item 1',
-    description: 'Lorem Ipsum ismet',
-  },
-  {
-    name: 'Item 2',
-    description: 'Lorem Ipsum ismet',
-  },
-]
-
-const form = ref({
-  name: '',
-  options: [],
-})
-
-const createAttribute = () => {
-  if(form.value.options.length === 0)
-    addOption();
-  showProductAttributeFormDialog.value = true;
-}
-
-const addOption = () => {
-  form.value.options.push({
-    value: '',
-  })
-}
-
-const removeOption = (index) => {
-  form.value.options.splice(index, 1);
-}
-</script>
-
 <template>
 <div class="q-pa-md products-attribute-table">
   <TableSkeleton v-if="loading"></TableSkeleton>
@@ -196,7 +147,7 @@ const removeOption = (index) => {
 <!--      <q-separator />-->
 
       <q-card-actions align="right" class="dialog_bottom">
-        <q-btn flat label="Submit" color="primary" v-close-popup />
+        <q-btn flat label="Submit" color="primary" @click="saveAttribute" />
         <q-btn flat label="Cancel" color="primary" v-close-popup />
       </q-card-actions>
     </q-card>
@@ -204,6 +155,80 @@ const removeOption = (index) => {
 
 </div>
 </template>
+
+<script setup>
+
+import TableSkeleton from "components/skeleton/TableSkeleton.vue";
+import {ref} from "vue";
+import {useAttributeRequest} from "src/composables/useAttributeRequest";
+import {useQuasar} from "quasar";
+
+const loading = ref(false)
+const productAttributeFormRef = ref(null)
+const showProductAttributeFormDialog = ref(false)
+const filter = ref('')
+const headerTitle = ref('Add Attribute')
+const attributeRequest = useAttributeRequest()
+const $q = useQuasar()
+
+const columns = [
+  { name: 'name', align: 'left', label: 'Name', field: 'name', sortable: true },
+  { name: 'description', align: 'left', label: 'Description', field: 'description', sortable: false },
+]
+
+const rows = [
+  {
+    name: 'Item 1',
+    description: 'Lorem Ipsum ismet',
+  },
+  {
+    name: 'Item 2',
+    description: 'Lorem Ipsum ismet',
+  },
+]
+
+const form = ref({
+  name: '',
+  options: [],
+})
+
+const createAttribute = () => {
+  if(form.value.options.length === 0)
+    addOption();
+  showProductAttributeFormDialog.value = true;
+}
+
+const addOption = () => {
+  form.value.options.push({
+    value: '',
+  })
+}
+
+const removeOption = (index) => {
+  form.value.options.splice(index, 1);
+}
+
+const saveAttribute = async () => {
+  console.log(process.env.API_ROUTE)
+  const result = await productAttributeFormRef.value.validate();
+  if (!!!result) {
+    return;
+  }
+  loading.value = true;
+  try {
+    const { data } = await attributeRequest.addAttribute(form.value);
+
+    console.log(data);
+    // $q.notify({
+    //   type: "positive",
+    //   message: "Attribute created successfully",
+    // });
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+</script>
 
 <style lang="scss">
 .products-attribute-table,
