@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Laravel\Passport\RefreshToken;
+use Laravel\Passport\Token;
 
 class AuthController extends BaseController
 {
@@ -19,16 +22,66 @@ class AuthController extends BaseController
      */
     public function login(Request $request): JsonResponse
     {
-        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
-            $user = Auth::user();
-            $response['token'] =  $user->createToken(config('constants.request_token'))->accessToken;
-            $response['user'] =  $user;
+        try {
 
-            return $this->sendResponse($response, 'User login successfully.');
+            if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
+                $user = Auth::user();
+                $accessToken =  $user->createToken(config('constants.request_token'))->accessToken;
+
+                $user->getRoleNames()->toArray();
+
+                $responseData = [
+                    'user' => $user,
+                    'permissions' => $user->getPermissionsViaRoles()->pluck('name')->toArray(),
+                    'access_token' => $accessToken,
+                    'roles' => $user->getRoleNames(),
+                ];
+
+                return $this->sendResponse($responseData, 'User login successfully.');
+            }
+            else{
+                return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);
+            }
+
+        } catch (\Exception $ex) {
+            $message = $ex->getMessage();
+            if (isset($ex->validator)) {
+                $message = $ex->validator;
+            }
+            return response()->json(['error' => $message, 'e' => $ex], 403);
         }
-        else{
-            return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);
+    }
+
+    public function logout(Request $request)
+    {
+
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            $success = $user->token()->revoke();
+//            $tokens =  $user->tokens->pluck('id');
+//            Token::whereIn('id', $tokens)
+//                ->update(['revoked'=> true]);
+//
+//            $success = RefreshToken::whereIn('access_token_id', $tokens)->update(['revoked' => true]);
+
+            if ($success) {
+                DB::commit();
+                return $this->sendResponse(['success' => $success], 'User logged out successfully.');
+            } else {
+                DB::rollBack();
+                return $this->sendError('Error occured.', ['error'=>'Error occured.']);
+            }
+
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            $message = $ex->getMessage();
+            if (isset($ex->validator)) {
+                $message = $ex->validator;
+            }
+            return response()->json(['error' => $message, 'e' => $ex], 403);
         }
+
     }
 
     /**

@@ -56,6 +56,7 @@
               color="red-5"
               icon="fa-solid fa-power-off"
               label="LOGOUT"
+              @click="logout"
               flat
               dense
             />
@@ -143,6 +144,10 @@
 import { defineComponent, ref } from 'vue'
 import { fabYoutube } from '@quasar/extras/fontawesome-v6'
 import { useQuasar } from "quasar";
+import Cookies from "js-cookie";
+import {useAuthenticationRequest} from "src/composables/useAuthenticationRequest";
+import {useAuthenticationHelper} from "src/composables/useAuthenticationHelper";
+import {useRoute, useRouter} from "vue-router";
 
 export default defineComponent({
   name: 'MainLayout',
@@ -151,11 +156,42 @@ export default defineComponent({
     const leftDrawerOpen = ref(false)
     const search = ref('')
     const $q = useQuasar()
-
-    console.log($q.fullscreen);
+    const authRequest = useAuthenticationRequest()
+    const authHelper = useAuthenticationHelper()
+    const router = useRouter()
+    const route = useRoute()
 
     function toggleLeftDrawer() {
       leftDrawerOpen.value = !leftDrawerOpen.value
+    }
+
+    function logout() {
+      $q.dialog({
+        title: "Logout",
+        message: "Are you sure you want to logout?",
+        class: "alertDialog",
+        cancel: true,
+        persistent: true,
+      })
+        .onOk(() => {
+          const token = Cookies.get("token");
+
+          authRequest.logout({token: token})
+            .then((response) => {
+              if (response.success){
+                authHelper.removeAllCookies();
+
+                router.replace(
+                  { path: "/login", params: { ...route.params } },
+                  () => {
+                    router.go(0);
+                  }
+                );
+              }
+
+            })
+
+        })
     }
 
     return {
@@ -165,6 +201,7 @@ export default defineComponent({
       search,
 
       toggleLeftDrawer,
+      logout,
 
       links1: [
         {icon: 'fa-solid fa-cash-register', text: 'SALES', to: '#'},

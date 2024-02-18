@@ -1,6 +1,7 @@
 import { route } from 'quasar/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
+import Cookies from "js-cookie";
 
 /*
  * If not building with SSR mode, you can
@@ -25,6 +26,36 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE)
   })
+
+  Router.beforeEach( (to, from, next) => {
+
+    // if (Cookies.get("user_type") === undefined) Cookies.remove("token");
+
+    const isAuthenticated = typeof Cookies.get("token") === "string";
+    const isRequiresAuth = to.meta.requiresAuth || false;
+
+    if (isRequiresAuth && !isAuthenticated) {
+      next({ name: 'DASHBOARD' });
+    } else if (!isRequiresAuth && isAuthenticated) {
+      next({ name: 'LOGIN' });
+    } else {
+      next();
+    }
+
+  })
+
+  Router.afterEach((to) => {
+    if (to?.meta?.breadCrumb)
+      // from
+      // Use next tick to handle router history correctly
+      // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
+      // Vue.nextTick(() => {
+      document.title = `${to.meta.breadCrumb} - MJ Vapors`;
+  });
+
+  function isAuthenticated() {
+    return Cookies.get("token") != null;
+  }
 
   return Router
 })
