@@ -110,7 +110,8 @@ module.exports = configure(function (/* ctx */) {
       plugins: [
         'AppFullscreen',
         'Dialog',
-        'Loading'
+        'Loading',
+        'Notify'
       ]
     },
 
