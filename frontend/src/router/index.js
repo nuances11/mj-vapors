@@ -27,15 +27,18 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE)
   })
 
-  Router.beforeEach( (to, from, next) => {
+  Router.beforeEach(  (to, from, next) => {
 
     // if (Cookies.get("user_type") === undefined) Cookies.remove("token");
 
     const isAuthenticated = typeof Cookies.get("token") === "string";
     const isRequiresAuth = to.meta.requiresAuth || false;
 
+    console.log('isAuthenticated', isAuthenticated)
+    console.log('isRequiresAuth', isRequiresAuth)
+
     if (isRequiresAuth && !isAuthenticated) {
-      next({ name: 'DASHBOARD' });
+      next({ name: 'LOGIN' });
     } else if (!isRequiresAuth && isAuthenticated) {
       next({ name: 'LOGIN' });
     } else {

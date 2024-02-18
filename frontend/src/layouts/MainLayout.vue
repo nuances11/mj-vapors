@@ -14,7 +14,7 @@
         <q-btn flat no-caps no-wrap class="q-ml-xs" v-if="$q.screen.gt.xs">
 <!--          <q-icon :name="fabYoutube" color="red" size="28px" />-->
           <img
-            alt="Quasar logo"
+            alt="Theme logo"
             src="~assets/logo.jpg"
             style="width: 50px;"
           >
@@ -74,27 +74,12 @@
     >
       <q-scroll-area class="fit">
         <q-list padding>
-<!--          <q-item-->
-<!--            v-for="link in links1"-->
-<!--            :key="link.text"-->
-<!--            v-ripple-->
-<!--            clickable-->
-<!--            :to="link.to"-->
-<!--            class="text-subtitle1 color-white"-->
-<!--          >-->
-<!--            <q-item-section avatar>-->
-<!--              <q-icon color="grey" :name="link.icon" />-->
-<!--            </q-item-section>-->
-<!--            <q-item-section>-->
-<!--              <q-item-label>{{ link.text }}</q-item-label>-->
-<!--            </q-item-section>-->
-<!--          </q-item>-->
           <q-expansion-item
             :content-inset-level="0.5"
             expand-separator
-            icon="fa-solid fa-dolly"
+            icon="fa-solid fa-bag-shopping"
             label="Products"
-            default-opened>
+            >
 
               <q-item
                 v-ripple
@@ -123,10 +108,20 @@
                 <q-item-label>Attributes</q-item-label>
               </q-item-section>
             </q-item>
-
-
-
           </q-expansion-item>
+          <q-item
+            v-ripple
+            clickable
+            to="/users"
+            class="text-subtitle1 color-white"
+          >
+            <q-item-section avatar>
+              <q-icon name="fa-solid fa-users" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Users</q-item-label>
+            </q-item-section>
+          </q-item>
 
         </q-list>
       </q-scroll-area>

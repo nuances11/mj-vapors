@@ -4,7 +4,7 @@
       <div class="login_wrapper">
         <div class="container">
           <div class="row login-box">
-            <div class="col-lg-6 form-section">
+            <div class="col-lg-6 col-md-6 q-pa-md form-section">
               <div class="form-inner">
                 <a href="/" class="logo">
                   <img
@@ -73,7 +73,7 @@
               </div>
             </div>
             <div
-              class="col-lg-6 flex items-center bg-img"
+              class="col-lg-6 col-md-6 flex items-center bg-img"
               v-if="!$q.screen.lt.sm"
             >
               <div class="login_desc">
