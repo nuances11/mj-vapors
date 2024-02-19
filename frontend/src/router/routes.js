@@ -20,6 +20,11 @@ const routes = [
         component: () => import('pages/Products/AttributeList.vue'),
         meta: { breadCrumb: "Product Attribute List" },
       },
+      {
+        path: '/users',
+        component: () => import('pages/Users/UserList.vue'),
+        meta: { breadCrumb: "Users" },
+      },
     ],
     meta: {
       requiresAuth: true,
