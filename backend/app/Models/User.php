@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -11,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasRoles, Notifiable;
+    use HasApiTokens, HasRoles, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -19,10 +20,15 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'user_type',
+        'user_name'
     ];
+
+    protected $appends = ['full_name'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,4 +51,38 @@ class User extends Authenticatable
     ];
 
     protected function getDefaultGuardName(): string { return 'api'; }
+
+    public function scopeSearch($query, $keyword)
+    {
+        $query->when($keyword !== '', function ($query) use ($keyword) {
+            $query->where(function ($query) use ($keyword) {
+                $query->whereRaw("first_name LIKE '%$keyword%'")
+                    ->orWhereRaw("last_name LIKE '%$keyword%'");
+            });
+        });
+    }
+
+    public function scopeFilter($query, $filters)
+    {
+        foreach ($filters as $filter_name => $filter_value) {
+            $query->where($filter_name, $filter_value);
+        }
+    }
+
+    public function getFullNameAttribute()
+    {
+
+        return $this->first_name . ' ' . $this->last_name;
+
+    }
+
+    public function areVendorUsers()
+    {
+        return $this->where('user_type', 'vendor')->get();
+    }
+
+    public function areAdminUsers()
+    {
+        return $this->where('user_type', 'admin')->get();
+    }
 }

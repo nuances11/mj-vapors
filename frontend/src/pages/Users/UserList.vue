@@ -79,21 +79,21 @@
         </div>
       </transition>
     </div>
-    <UserTable
+    <DataTable
       v-model:pagination="pagination"
       class="no-box-shadow no-border-radius"
       :rows="rows"
       :columns="columns"
       hide-bottom
       @request="getUsers"
-    >
+    />
   </div>
 </template>
 
 <script setup>
 import {computed, reactive, ref, watch} from "vue";
 import {useQuasar} from "quasar";
-import UserTable from "pages/Users/UserTable.vue";
+import DataTable from "components/Table/DataTable.vue";
 
 const $q = useQuasar()
 const keyword = ref("");

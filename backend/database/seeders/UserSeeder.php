@@ -27,7 +27,11 @@ class UserSeeder extends Seeder
         Artisan::call('passport:install');
 
         $superAdmin = User::create([
-            'name' => 'Super Admin',
+            'first_name' => 'Super',
+            'last_name' => 'Admin',
+            'user_type' => 'super_admin',
+            'status' => 'active',
+            'user_name' => 'super_admin',
             'email' => 'sirnoel.webdev@gmail.com',
             'password' => Hash::make('Welcome@'.date('Y')),
         ]);
@@ -37,7 +41,11 @@ class UserSeeder extends Seeder
         $superAdmin->syncRoles($superAdminRole);
 
         $admin = User::create([
-            'name' => 'Admin Admin',
+            'first_name' => 'Admin',
+            'last_name' => 'Admin',
+            'user_type' => 'admin',
+            'status' => 'active',
+            'user_name' => 'admin_admin',
             'email' => 'sirnoel.webdev+admin@gmail.com',
             'password' => Hash::make('Welcome@'.date('Y')),
         ]);
@@ -47,7 +55,11 @@ class UserSeeder extends Seeder
         $admin->syncRoles($adminRole);
 
         $vendor = User::create([
-            'name' => 'Vendor Vendor',
+            'first_name' => 'Vendor',
+            'last_name' => 'Vendor',
+            'user_type' => 'vendor',
+            'status' => 'active',
+            'user_name' => 'vendor',
             'email' => 'sirnoel.webdev+vendor@gmail.com',
             'password' => Hash::make('Welcome@'.date('Y')),
         ]);

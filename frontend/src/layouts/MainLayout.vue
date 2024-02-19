@@ -29,6 +29,9 @@
         <q-space />
 
         <div class="q-gutter-sm row items-center no-wrap">
+          <span v-if="first_name" class="text-subtitle1">
+            Welcome, <strong>{{ first_name }}</strong>
+          </span>
           <q-icon
             class="YL__fullscreen"
             size="28px"
@@ -155,6 +158,7 @@ export default defineComponent({
     const authHelper = useAuthenticationHelper()
     const router = useRouter()
     const route = useRoute()
+    const first_name = Cookies.get('user_first_name');
 
     function toggleLeftDrawer() {
       leftDrawerOpen.value = !leftDrawerOpen.value
@@ -194,6 +198,7 @@ export default defineComponent({
 
       leftDrawerOpen,
       search,
+      first_name,
 
       toggleLeftDrawer,
       logout,

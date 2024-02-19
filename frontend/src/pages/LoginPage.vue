@@ -23,7 +23,7 @@
                     v-model="form.email"
                     type="email"
                     placeholder="Email"
-                    class="login-input"
+                    class="login-input "
                     standout
                     :rules="[
                     (val) => !!val || 'Email should not be empty',
@@ -38,7 +38,7 @@
                     v-model="form.password"
                     placeholder="Password"
                     :type="pwdType"
-                    class="login-input q-pa-none"
+                    class="login-input"
                     :rules="[
                     (val) =>
                       (val !== '' && val !== null) ||
@@ -146,6 +146,7 @@ const login = async () => {
         if (self.rememberMe) {
           Cookies.set("token", data.access_token, {expires: 365});
           Cookies.set("roles", data.roles, {expires: 365});
+          Cookies.set("user_first_name", data.user.first_name, {expires: 365});
           Cookies.set("user_id", data.user.id, {expires: 365});
           Cookies.set("user_type", data.user.roles[0].name, {
             expires: 365,
@@ -156,6 +157,7 @@ const login = async () => {
 
         } else {
           Cookies.set("user_id", data.user.id);
+          Cookies.set("user_first_name", data.user.first_name);
           Cookies.set("token", data.access_token);
           Cookies.set("roles", data.roles);
           Cookies.set("user_type", data.user.roles[0].name);
