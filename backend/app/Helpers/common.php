@@ -54,3 +54,36 @@ if (!function_exists('generateSlug')) {
         return Str::slug($sluggableString);
     }
 }
+
+if (!function_exists('jeEncrypter')) {
+    function jeEncrypter($txt) {
+        $cipher = "aes-128-ctr";
+        $key = "mj-vapors"; // static for now
+        $ciphertext = "";
+
+        // check if exist the cipher
+        if (in_array($cipher, openssl_get_cipher_methods())) {
+            $ivlen = openssl_cipher_iv_length($cipher);
+            $iv = openssl_random_pseudo_bytes($ivlen);
+            $ciphertext = openssl_encrypt($txt, $cipher, $key, $options=0, $iv);
+        }
+
+        return $ciphertext."+*".base64_encode($iv);
+    }
+}
+
+if (!function_exists('jeDecrypter')) {
+    function jeDecrypter($txt) {
+        $original_plaintext = "";
+        $cipher = "aes-128-ctr";
+        $key = "mj-vapors"; // static for now
+        [$txt, $iv] = explode("+*", $txt);
+        $iv = base64_decode($iv);
+
+        if (in_array($cipher, openssl_get_cipher_methods())) {
+            $original_plaintext = openssl_decrypt($txt, $cipher, $key, $options=0, $iv);
+        }
+
+        return $original_plaintext;
+    }
+}

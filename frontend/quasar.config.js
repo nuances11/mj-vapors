@@ -111,6 +111,7 @@ module.exports = configure(function (/* ctx */) {
         'AppFullscreen',
         'Dialog',
         'Loading',
+        'LoadingBar',
         'Notify'
       ]
     },

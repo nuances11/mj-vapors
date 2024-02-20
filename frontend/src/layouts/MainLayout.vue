@@ -160,6 +160,12 @@ export default defineComponent({
     const route = useRoute()
     const first_name = Cookies.get('user_first_name');
 
+    // $q.loadingBar.setDefaults({
+    //   color: 'red',
+    //   size: '15px',
+    //   position: 'top'
+    // })
+
     function toggleLeftDrawer() {
       leftDrawerOpen.value = !leftDrawerOpen.value
     }
@@ -168,9 +174,13 @@ export default defineComponent({
       $q.dialog({
         title: "Logout",
         message: "Are you sure you want to logout?",
-        class: "alertDialog",
-        cancel: true,
-        persistent: true,
+        ok: {
+          color: 'negative'
+        },
+        cancel: {
+          color: 'secondary',
+        },
+        persistent: true
       })
         .onOk(() => {
           const token = Cookies.get("token");

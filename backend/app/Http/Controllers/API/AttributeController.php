@@ -55,7 +55,6 @@ class AttributeController extends BaseController
      */
     public function store(Request $request): JsonResponse
     {
-//        return response()->json($request->all());
         DB::beginTransaction();
         try {
             $data = $request->all();
