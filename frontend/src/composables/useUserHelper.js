@@ -9,6 +9,13 @@ export function useUserHelper() {
         sortable: true,
       },
       {
+        name: "email",
+        label: "Email",
+        field: "email",
+        align: "left",
+        sortable: true,
+      },
+      {
         name: "user_type",
         label: "Type",
         field: "user_type",

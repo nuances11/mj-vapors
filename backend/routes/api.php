@@ -27,6 +27,7 @@ Route::apiResource('attributes', AttributeController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
+    Route::get('users/{id}/check-password', [UserController::class, 'checkPassword']);
     Route::apiResource('users', UserController::class);
 });
 

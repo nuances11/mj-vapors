@@ -8,6 +8,7 @@ use Exception;
 use Faker\Provider\Base;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -90,16 +91,61 @@ class UserController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $user = User::findOrFail($id);
+
+            $user = $user->update($request->all());
+
+            DB::commit();
+            return $this->sendResponse($user, 'User updated successfully.');
+        } catch(Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+            DB::commit();
+            return $this->sendResponse([], 'User deleted successfully.');
+
+        } catch(Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
+        return response()->json($id);
+    }
+
+    public function checkPassword (Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $matched = Hash::check($request->password, $user->password);
+            if ($matched) {
+                return $this->sendResponse([
+                    'matched' => $matched
+                ], 'Password matched.');
+            } else {
+                return $this->sendResponse([
+                    'matched' => $matched
+                ], 'Password not matched.');
+            }
+
+        }
+        catch(Exception $e) {
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
 }

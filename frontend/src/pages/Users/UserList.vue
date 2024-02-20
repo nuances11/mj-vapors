@@ -105,7 +105,7 @@
           <q-card-section class="q-pt-none">
             <q-select
               class="q-mb-md"
-              v-if="!isAddMode"
+              v-if="!isAddMode && userForm.id !== parseInt(currentUserId)"
               dense
               filled
               v-model="userForm.status"
@@ -118,6 +118,7 @@
               emit-value
             />
             <q-select
+              v-if="userForm.id !== parseInt(currentUserId)"
               class="q-mb-md"
               dense
               filled
@@ -176,6 +177,7 @@
             />
 
             <q-input
+              v-if="isAddMode"
               dense
               class="q-mb-md"
               filled
@@ -212,6 +214,42 @@
         </q-form>
       </q-card>
     </q-dialog>
+
+    <q-dialog
+      v-model="deleteUserDialog"
+      persistent
+    >
+      <q-card style="width: 300px">
+        <q-form ref="deleteUserFormRef" @submit="proceedDelete">
+          <q-card-section>
+            <div class="text-h6">Delete User</div>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            Are you sure you want to delete <strong>{{ deleteForm.full_name }}</strong>?
+            <q-input
+              dense
+              class="q-mt-xs"
+              filled
+              square
+              v-model="deleteForm.password"
+              label="Your Password *"
+              hint="Enter you password confirm."
+              lazy-rules
+              type="password"
+              :rules="[ val => val && val.length > 0 || 'Please type something', passwordLength]"
+            >
+            </q-input>
+          </q-card-section>
+
+          <q-card-actions align="right" class="bg-white">
+            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn flat label="Delete" text-color="red" type="submit" />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+
+    </q-dialog>
   </div>
 </template>
 
@@ -223,6 +261,7 @@ import {useUserHelper} from "src/composables/useUserHelper";
 import {useUserRequest} from "src/composables/useUserRequest";
 import {useCommonHelper} from "src/composables/useCommonHelper";
 import {useValidationHelper} from "src/composables/useValidationHelper";
+import Cookies from "js-cookie";
 
 const validationHelper = useValidationHelper()
 const commonHelper = useCommonHelper()
@@ -264,6 +303,9 @@ const userFormDialog = ref(false)
 const isAddMode = ref(false);
 const formTitle = ref('Add User');
 const userFormRef = ref(null);
+const deleteUserFormRef = ref(null);
+const currentUserId = Cookies.get("user_id");
+const deleteUserDialog = ref(false);
 
 const filters = reactive({
   status: [],
@@ -280,9 +322,47 @@ const userForm = ref({
   status: null
 })
 
+const deleteForm = ref({
+  id: null,
+  full_name: '',
+  password: '',
+})
+
 const submitForm = async () => {
   if (isAddMode.value) await saveUser()
-  // else await updateUser()
+  else await updateUser()
+}
+
+const updateUser = async () => {
+  const result = await userFormRef.value.validate();
+  if (!!!result) {
+    return;
+  }
+
+  try {
+    await userRequest.updateUser(userForm.value.id, userForm.value)
+      .then((response) => {
+        if (!response.success) {
+          $q.notify({
+            type: "negative",
+            icon: 'report_problem',
+            message: response.message,
+          });
+        } else {
+          $q.notify({
+            type: "positive",
+            icon: 'check_circle',
+            message: response.message,
+          });
+          resetForm()
+          userFormDialog.value = false;
+          refreshList()
+        }
+      });
+
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 const saveUser = async () => {
@@ -297,19 +377,20 @@ const saveUser = async () => {
         if (!response.success) {
           $q.notify({
             type: "negative",
+            icon: 'report_problem',
             message: response.message,
           });
         } else {
           $q.notify({
             type: "positive",
+            icon: 'check_circle',
             message: response.message,
           });
+          resetForm()
+          userFormDialog.value = false;
+          refreshList()
         }
       });
-
-    resetForm()
-    userFormDialog.value = false;
-    getUsers()
 
   } catch (error) {
     console.log(error);
@@ -344,6 +425,12 @@ const resetForm = () => {
   }
 }
 
+
+const refreshList = async () => {
+  await getUsers({
+    pagination: pagination.value,
+  })
+}
 const closeFormDialog = () => {
   resetForm()
   userFormDialog.value = false;
@@ -353,8 +440,103 @@ const addUser = () => {
   isAddMode.value = true;
   userFormDialog.value = true;
 }
+
+const proceedDelete = async () => {
+  const result = await deleteUserFormRef.value.validate();
+  if (!!!result) {
+    return;
+  }
+
+  try {
+    await userRequest.checkUserPassword(deleteForm.value.id, {id: deleteForm.value.id, password: deleteForm.value.password})
+      .then(async (response) => {
+        if (!response.data.matched) {
+          $q.notify({
+            type: "negative",
+            icon: 'report_problem',
+            message: response.message,
+          });
+        } else {
+          await userRequest.deleteUser(deleteForm.value.id)
+            .then((response) => {
+              if (!response.success) {
+                $q.notify({
+                  type: "negative",
+                  icon: 'report_problem',
+                  message: response.message,
+                });
+              } else {
+                $q.notify({
+                  type: "positive",
+                  icon: 'check_circle',
+                  message: response.message,
+                });
+                deleteUserDialog.value = false;
+                deleteForm.value.id = null;
+                deleteForm.value.full_name = '';
+                deleteForm.value.password = '';
+                refreshList()
+              }
+            });
+        }
+      });
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 const deleteUser = async (props) => {
   console.log('deleteUser', props)
+  deleteUserDialog.value = true
+  deleteForm.value.id = props.id
+  deleteForm.value.full_name = props.full_name
+  // $q.dialog({
+  //   title: 'Delete User',
+  //   message: `If you sure to delete <strong>${props.full_name}</strong> . Enter your password to confirm.`,
+  //   prompt: {
+  //     model: '',
+  //     isValid: val => val.length > 5,
+  //     type: 'password'
+  //   },
+  //   html: true,
+  //   cancel: true,
+  //   persistent: true
+  // }).onOk(async data => {
+  //   try {
+  //     await userRequest.checkUserPassword(props.id, {id: props.id, password: data})
+  //       .then(async (response) => {
+  //         if (!response.success) {
+  //           $q.notify({
+  //             type: "negative",
+  //             icon: 'report_problem',
+  //             message: response.message,
+  //           });
+  //         } else {
+  //           await userRequest.deleteUser(props.id)
+  //             .then((response) => {
+  //               if (!response.success) {
+  //                 $q.notify({
+  //                   type: "negative",
+  //                   icon: 'report_problem',
+  //                   message: response.message,
+  //                 });
+  //               } else {
+  //                 $q.notify({
+  //                   type: "positive",
+  //                   icon: 'check_circle',
+  //                   message: response.message,
+  //                 });
+  //                 refreshList()
+  //               }
+  //             });
+  //         }
+  //       });
+  //
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // })
 }
 
 const editUser = async (props) => {

@@ -32,6 +32,7 @@
               @click="editItem(props)"
             />
             <q-btn
+              v-if="parseInt(currentUserId) !== props.row.id"
               class="q-mr-xs"
               size="sm"
               color="negative"
@@ -57,7 +58,9 @@ import Cookies from "js-cookie";
 
 const emit = defineEmits(['deleteItem', 'editItem'])
 
-const cookieData = Cookies.get();
+const currentUserId = Cookies.get("user_id");
+const currentUserType = Cookies.get("user_type");
+// const currentUserId = cookieData.user_id
 
 const props = defineProps({
   loading: {

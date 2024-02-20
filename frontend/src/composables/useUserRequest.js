@@ -13,7 +13,7 @@ export function useUserRequest() {
     });
   };
 
-  const getUser = (data) => {
+  const getUser = (id, data) => {
     return request.get(api + "/" + id, {
       params: data,
     });
@@ -27,11 +27,18 @@ export function useUserRequest() {
     return request.delete(api + "/" + id);
   };
 
+  const checkUserPassword = (id, data) => {
+    return request.get(api + "/" + id + "/check-password", {
+      params: data,
+    });
+  };
+
   return {
     getUsers,
     getUser,
     addUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    checkUserPassword
   }
 }
