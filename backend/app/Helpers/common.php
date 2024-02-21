@@ -35,6 +35,7 @@ if(!function_exists('paginatedRequest')){
 
         // get filter
         $filters = array_filter(json_decode(Arr::get($requestParams, 'filters', '{}'), true));
+//        $filters = array_filter(Arr::get($requestParams, 'filters', '{}'));
 
         return [
             "current_user_id" => $currentUserId,

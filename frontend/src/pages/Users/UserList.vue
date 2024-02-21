@@ -64,20 +64,25 @@
             label="Status"
             style="min-width: 200px"
             :options="statusOptions"
+            map-options
+            option-label="label"
+            option-value="value"
+            emit-value
           />
         </div>
         <div v-else-if="hasFilters">
-          <q-chip
-            v-for="(status) in filters.status"
-            :key="status"
-            removable
-            color="primary"
-            text-color="white"
-            icon="check_circle"
-            :ripple="false"
-          >
-            {{ status }}
-          </q-chip>
+          <div v-for="(filter, key, index) in filters" :key="`filter-${index}`">
+            <q-chip
+              removable
+              color="primary"
+              text-color="white"
+              :icon="getIcon(key, filter)"
+              :ripple="false"
+              @remove="removeFilter(filters, key)"
+            >
+              {{ capitalize(filter) }}
+            </q-chip>
+          </div>
         </div>
       </transition>
     </div>
@@ -90,6 +95,8 @@
       v-model:pagination="pagination"
       @delete-item="deleteUser"
       @edit-item="editUser"
+      no-data-label="I didn't find anything for you"
+      no-results-label="The filter didn't uncover any results"
     />
 
     <q-dialog
@@ -254,7 +261,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref, watch} from "vue";
+import {capitalize, computed, onMounted, reactive, ref, watch} from "vue";
 import {useQuasar} from "quasar";
 import DataTable from "components/Table/DataTable.vue";
 import {useUserHelper} from "src/composables/useUserHelper";
@@ -299,6 +306,9 @@ const userTypeOptions = ref([
     value: 'vendor',
   },
 ]);
+const iconFilters = {
+  status: { inactive: "close", active: "check_circle" },
+};
 const userFormDialog = ref(false)
 const isAddMode = ref(false);
 const formTitle = ref('Add User');
@@ -308,7 +318,7 @@ const currentUserId = Cookies.get("user_id");
 const deleteUserDialog = ref(false);
 
 const filters = reactive({
-  status: [],
+  status: null,
 });
 
 const userForm = ref({
@@ -327,6 +337,19 @@ const deleteForm = ref({
   full_name: '',
   password: '',
 })
+
+const removeFilter = (selected, index) => {
+  delete selected[index]
+  // selected.splice(index, 1);
+};
+
+const getIcon = (key, value) => {
+  if (key === "status") {
+    return iconFilters["status"][value.toLowerCase()];
+  } else {
+    return iconFilters[key];
+  }
+};
 
 const submitForm = async () => {
   if (isAddMode.value) await saveUser()
@@ -487,74 +510,28 @@ const proceedDelete = async () => {
 }
 
 const deleteUser = async (props) => {
-  console.log('deleteUser', props)
   deleteUserDialog.value = true
   deleteForm.value.id = props.id
   deleteForm.value.full_name = props.full_name
-  // $q.dialog({
-  //   title: 'Delete User',
-  //   message: `If you sure to delete <strong>${props.full_name}</strong> . Enter your password to confirm.`,
-  //   prompt: {
-  //     model: '',
-  //     isValid: val => val.length > 5,
-  //     type: 'password'
-  //   },
-  //   html: true,
-  //   cancel: true,
-  //   persistent: true
-  // }).onOk(async data => {
-  //   try {
-  //     await userRequest.checkUserPassword(props.id, {id: props.id, password: data})
-  //       .then(async (response) => {
-  //         if (!response.success) {
-  //           $q.notify({
-  //             type: "negative",
-  //             icon: 'report_problem',
-  //             message: response.message,
-  //           });
-  //         } else {
-  //           await userRequest.deleteUser(props.id)
-  //             .then((response) => {
-  //               if (!response.success) {
-  //                 $q.notify({
-  //                   type: "negative",
-  //                   icon: 'report_problem',
-  //                   message: response.message,
-  //                 });
-  //               } else {
-  //                 $q.notify({
-  //                   type: "positive",
-  //                   icon: 'check_circle',
-  //                   message: response.message,
-  //                 });
-  //                 refreshList()
-  //               }
-  //             });
-  //         }
-  //       });
-  //
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // })
 }
 
 const editUser = async (props) => {
 
-  userForm.value = props
+  userForm.value = commonHelper.deepClone(props)
   isAddMode.value = false;
   userFormDialog.value = true;
-  console.log('editUser', userForm.value)
 }
 
 const hasFilters = computed(() => {
-  return filters.status.length > 0;
+  return (
+    filters.status !== null
+  );
 });
 
 const getUsers = async (props) => {
   let query = props.pagination ? props.pagination : pagination.value;
   query.keyword = keyword.value;
-  query.filters = filters;
+  query.filters = JSON.stringify(filters);
 
   pagination.value = props.pagination;
 
@@ -574,19 +551,20 @@ const getColumns = () => {
 
 
 watch(keyword, () => {
-  getOffcieUsers    ({
+  getUsers({
     pagination: pagination.value,
   });
 });
 
 
 watch(
-  () => filters.status,
+  () => filters,
   () => {
-    getOffcieUsers({
+    getUsers({
       pagination: pagination.value,
     });
-  }
+  },
+  { deep: true }
 );
 
 onMounted(() => {
