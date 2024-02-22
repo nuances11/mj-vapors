@@ -7,6 +7,10 @@
       flat
       v-bind="$attrs"
     >
+      <template v-slot:loading>
+        <q-inner-loading showing color="primary" />
+      </template>
+
       <template v-slot:body-cell-status="props">
         <q-td :props="props">
           <q-chip
@@ -29,15 +33,16 @@
               color="primary"
               icon="edit"
               label="Edit"
+              :loading="loading"
               @click="editItem(props)"
             />
             <q-btn
-              v-if="parseInt(currentUserId) !== props.row.id"
               class="q-mr-xs"
               size="sm"
               color="negative"
               icon="delete"
               label="Delete"
+              :loading="loading"
               @click="deleteItem(props)"
             />
 
@@ -68,6 +73,8 @@ const props = defineProps({
     default: false,
   },
 });
+
+console.log(props.loading)
 
 const deleteItem = (props) => {
   emit('deleteItem', props.row)

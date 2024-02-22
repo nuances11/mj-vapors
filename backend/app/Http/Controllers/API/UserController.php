@@ -125,7 +125,6 @@ class UserController extends BaseController
             DB::rollBack();
             return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
         }
-        return response()->json($id);
     }
 
     public function checkPassword (Request $request)

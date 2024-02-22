@@ -25,6 +25,11 @@ const routes = [
         component: () => import('pages/Users/UserList.vue'),
         meta: { breadCrumb: "Users" },
       },
+      {
+        path: '/branches',
+        component: () => import('pages/Branches/BranchList.vue'),
+        meta: { breadCrumb: "Branches" },
+      },
     ],
     meta: {
       requiresAuth: true,

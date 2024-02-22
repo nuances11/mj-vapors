@@ -29,6 +29,7 @@
               text-color="white"
               class="q-ml-md"
               label="Show Filters"
+              :loading="loading"
               @click="filter = true"
             />
             <q-btn
@@ -39,6 +40,7 @@
               text-color="white"
               class="q-ml-md"
               label="Close Filters"
+              :loading="loading"
               @click="filter = false"
             />
           </transition>
@@ -48,6 +50,7 @@
             text-color="white"
             color="secondary"
             class="q-ml-md"
+            :loading="loading"
             @click="addUser"
           />
         </div>
@@ -90,7 +93,6 @@
       class="no-box-shadow no-border-radius"
       :rows="rows"
       :columns="columns"
-      hide-bottom
       @request="getUsers"
       v-model:pagination="pagination"
       @delete-item="deleteUser"
@@ -316,6 +318,7 @@ const userFormRef = ref(null);
 const deleteUserFormRef = ref(null);
 const currentUserId = Cookies.get("user_id");
 const deleteUserDialog = ref(false);
+const loading = ref(false);
 
 const filters = reactive({
   status: null,
@@ -361,7 +364,7 @@ const updateUser = async () => {
   if (!!!result) {
     return;
   }
-
+  loading.value = true
   try {
     await userRequest.updateUser(userForm.value.id, userForm.value)
       .then((response) => {
@@ -381,6 +384,7 @@ const updateUser = async () => {
           userFormDialog.value = false;
           refreshList()
         }
+        loading.value = false
       });
 
   } catch (error) {
@@ -393,7 +397,7 @@ const saveUser = async () => {
   if (!!!result) {
     return;
   }
-  // loading.value = true;
+  loading.value = true;
   try {
     await userRequest.addUser(userForm.value)
       .then((response) => {
@@ -413,6 +417,7 @@ const saveUser = async () => {
           userFormDialog.value = false;
           refreshList()
         }
+        loading.value = true;
       });
 
   } catch (error) {
@@ -517,6 +522,7 @@ const deleteUser = async (props) => {
 
 const editUser = async (props) => {
 
+  formTitle.value = 'Update User'
   userForm.value = commonHelper.deepClone(props)
   isAddMode.value = false;
   userFormDialog.value = true;
@@ -529,6 +535,7 @@ const hasFilters = computed(() => {
 });
 
 const getUsers = async (props) => {
+  loading.value = true;
   let query = props.pagination ? props.pagination : pagination.value;
   query.keyword = keyword.value;
   query.filters = JSON.stringify(filters);
@@ -543,6 +550,8 @@ const getUsers = async (props) => {
   pagination.value.page = meta.current_page;
   pagination.value.rowsPerPage =
     parseInt(meta.per_page) === meta.total ? 0 : parseInt(meta.per_page);
+
+  loading.value = false;
 };
 
 const getColumns = () => {
