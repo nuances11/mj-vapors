@@ -11,6 +11,21 @@
         <q-inner-loading showing color="primary" />
       </template>
 
+      <template v-slot:body-cell-attribute_options="props">
+        <q-td :props="props">
+        <span v-if="props.row.attribute_options">
+          <q-chip dense square v-for="(option, index) in props.row.attribute_options" :key="index">
+            {{ option.value }}
+          </q-chip>
+
+        </span>
+          <span v-else>
+              N/A
+        </span>
+        </q-td>
+
+      </template>
+
       <template v-slot:body-cell-status="props">
         <q-td :props="props">
           <q-chip

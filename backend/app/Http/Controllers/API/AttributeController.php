@@ -30,7 +30,6 @@ class AttributeController extends BaseController
             ] = paginatedRequest();
 
             $query = Attribute::with('attributeOptions:id,value,attribute_id')
-//                ->query()
                 ->filter($filters)
                 ->search($searchKeyword);
 
@@ -60,14 +59,19 @@ class AttributeController extends BaseController
             $data = $request->all();
             $name = $data['name'];
             $slug = generateSlug($name);
-            $attribute = new Attribute();
-            $attribute->name = $name;
-            $attribute->slug = $slug;
-            $attribute->save();
-            $attribute->refresh();
+            $attrChecker = Attribute::where('slug', $slug)->first();
+            if ($attrChecker) {
+                DB::rollBack();
+                return $this->sendError('Attribute name already exist.', ['error' => 'Attribute name already exist.'], 403);
+            } else {
+                $attribute = new Attribute();
+                $attribute->name = $name;
+                $attribute->slug = $slug;
+                $attribute->save();
+                $attribute->refresh();
+            }
 
             if (count($data['options']) > 0) {
-//                $attribute->attributeOptions()->saveMany($data['options']);
                 foreach ($data['options'] as $option) {
                     $attributeOption = new AttributeOption();
                     $attributeOption->value =$option['value'];
@@ -100,16 +104,67 @@ class AttributeController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Attribute $attribute)
+    public function update(Request $request, $id)
     {
-        //
+//        $collection = collect($request->options);
+//        return response()->json($collection);
+
+        DB::beginTransaction();
+        try {
+            $data = $request->all();
+            $name = $data['name'];
+            $slug = generateSlug($name);
+            $attrChecker = Attribute::where('slug', $slug)->whereNot('id', $data['id'])->first();
+            if ($attrChecker) {
+                DB::rollBack();
+                return $this->sendError('Attribute name already exist.', ['error' => 'Attribute name already exist.'], 403);
+            } else {
+//                $attribute = Attribute::update([
+//                    'name' => $name,
+//                    'slug' => $slug
+//                ]);
+                $attribute = Attribute::findOrFail($data['id']);
+                $attribute->name = $name;
+                $attribute->slug = $slug;
+                $attribute->save();
+
+                $options = collect($request->options);
+
+                $options->each(function ($option) use ($attribute) {
+                    $attribute->attributeOptions()->updateOrCreate([
+                        'id' => $option['id'] ?? null,
+                    ], $option);
+                });
+
+                DB::commit();
+
+                return $this->sendResponse($attribute, 'Attribute updated');
+            }
+
+        } catch(Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Attribute $attribute)
+    public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $attribute = Attribute::findOrFail($id);
+            $attribute->delete();
+            DB::commit();
+            return $this->sendResponse([], 'Attribute deleted');
+
+        } catch(Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
+
 }
