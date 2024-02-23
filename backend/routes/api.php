@@ -22,15 +22,14 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 
-// Soon it will be added under a middleware
-Route::apiResource('attributes', AttributeController::class);
-
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
     Route::get('users/{id}/check-password', [UserController::class, 'checkPassword']);
+    Route::delete('attributes/option/{id}', [AttributeController::class, 'deleteOption']);
     Route::apiResource('users', UserController::class);
     Route::apiResource('branches', BranchController::class);
+    Route::apiResource('attributes', AttributeController::class);
 });
 
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

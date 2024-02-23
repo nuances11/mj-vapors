@@ -117,7 +117,7 @@
                       color="green-6"
                       icon="add"
                       label="Add Field"
-
+                      :loading="loading"
                     >
                       <q-tooltip>Add option field</q-tooltip>
                     </q-btn>
@@ -129,7 +129,8 @@
                         icon="delete"
                         label="Delete existing"
                         flat
-
+                        :loading="loading"
+                        @click="deleteOption(form.options[index].id, index)"
                       >
                         <q-tooltip>Delete existing option</q-tooltip>
                       </q-btn>
@@ -144,7 +145,7 @@
                         color="red-6"
                         icon="delete"
                         label="Delete Field"
-
+                        :loading="loading"
                       >
                         <q-tooltip>Delete field</q-tooltip>
                       </q-btn>
@@ -171,7 +172,7 @@
 
 <script setup>
 import ProductAttributesTable from "components/products/ProductAttributesTable.vue";
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {useAttributeRequest} from "src/composables/useAttributeRequest";
 import {useAttributeHelper} from "src/composables/useAttributeHelper";
 import {useQuasar} from "quasar";
@@ -204,6 +205,40 @@ const form = ref({
   name: '',
   options: [],
 })
+
+const deleteOption = (optionId, index) => {
+  console.log(optionId)
+  loading.value = true
+  $q.dialog({
+    title: 'Delete Record',
+    message: `Are you sure you want to delete this item?`,
+    cancel: true,
+    persistent: true,
+    html: true
+  }).onOk(async () => {
+    await attributeRequest.deleteAttributeOption(optionId)
+      .then((response) => {
+        if (!response.success) {
+          $q.notify({
+            type: "negative",
+            icon: 'report_problem',
+            message: response.message,
+          });
+        } else {
+          $q.notify({
+            type: "positive",
+            icon: 'check_circle',
+            message: response.message,
+          });
+          form.value.options.splice(index, 1);
+        }
+      });
+
+    loading.value = false
+  }).onCancel(() => {
+    loading.value = false
+  })
+}
 
 const submitForm = async () => {
   if (isAddMode.value) await saveAttribute()
@@ -372,6 +407,12 @@ const getAttributes = async (props) => {
   pagination.value.rows_per_page =
     parseInt(meta.per_page) === meta.total ? 0 : parseInt(meta.per_page);
 };
+
+watch(keyword, () => {
+  getAttributes({
+    pagination: pagination.value,
+  })
+});
 
 onMounted(() => {
   getColumns()

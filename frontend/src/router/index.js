@@ -34,9 +34,6 @@ export default route(function (/* { store, ssrContext } */) {
     const isAuthenticated = typeof Cookies.get("token") === "string";
     const isRequiresAuth = to.meta.requiresAuth || false;
 
-    console.log('isAuthenticated', isAuthenticated)
-    console.log('isRequiresAuth', isRequiresAuth)
-
     if (isRequiresAuth && !isAuthenticated) {
       next({ name: 'LOGIN' });
     } else if (!isRequiresAuth && isAuthenticated) {

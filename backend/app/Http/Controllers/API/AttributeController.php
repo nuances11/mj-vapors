@@ -167,4 +167,20 @@ class AttributeController extends BaseController
         }
     }
 
+    public function deleteOption($id)
+    {
+        DB::beginTransaction();
+        try {
+            $attribute = AttributeOption::findOrFail($id);
+            $attribute->delete();
+            DB::commit();
+            return $this->sendResponse([], 'Attribute option deleted');
+
+        } catch(Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
+    }
+
 }

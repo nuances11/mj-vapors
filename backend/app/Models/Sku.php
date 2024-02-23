@@ -36,4 +36,5 @@ class Sku extends Model
             'attribute_option_sku', 'sku_id', 'attribute_option_id');
 
     }
+
 }

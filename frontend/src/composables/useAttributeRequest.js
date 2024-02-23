@@ -27,11 +27,16 @@ export function useAttributeRequest() {
     return request.delete(api + "/" + id);
   };
 
+  const deleteAttributeOption = (id) => {
+    return request.delete(api + "/option/" + id);
+  };
+
   return {
     getAttributes,
     getAttribute,
     updateAttribute,
     deleteAttribute,
-    addAttribute
+    addAttribute,
+    deleteAttributeOption
   };
 }
