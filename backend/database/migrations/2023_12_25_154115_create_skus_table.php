@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('skus', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('attribute_option_id')->constrained()->cascadeOnDelete();
+//            $table->foreignId('attribute_option_id')->constrained()->cascadeOnDelete();
+            $table->json('attributes_options')->nullable();
             $table->string('code')->unique();
             $table->decimal('price', 10, 2);
             $table->timestamps();

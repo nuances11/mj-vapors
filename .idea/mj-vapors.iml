@@ -137,6 +137,8 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/monolog/monolog" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phpseclib/phpseclib" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phpunit/php-invoker" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/binary-cats/laravel-sku" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/owen-it/laravel-auditing" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

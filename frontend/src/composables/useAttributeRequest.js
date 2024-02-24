@@ -31,12 +31,19 @@ export function useAttributeRequest() {
     return request.delete(api + "/option/" + id);
   };
 
+  const getAttributeOptions = (data) => {
+    return request.get(api + '/get-options', {
+      params: data,
+    })
+  }
+
   return {
     getAttributes,
     getAttribute,
     updateAttribute,
     deleteAttribute,
     addAttribute,
-    deleteAttributeOption
+    deleteAttributeOption,
+    getAttributeOptions
   };
 }

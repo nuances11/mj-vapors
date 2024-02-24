@@ -12,7 +12,7 @@ const routes = [
       },
       {
         path: '/products',
-        component: () => import('pages/Products/index.vue'),
+        component: () => import('pages/Products/ProductList.vue'),
         meta: { breadCrumb: "Products" },
       },
       {

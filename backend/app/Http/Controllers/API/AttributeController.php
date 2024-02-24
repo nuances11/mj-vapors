@@ -16,7 +16,7 @@ class AttributeController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function index(Request $request)
     {
         try {
 
@@ -29,9 +29,14 @@ class AttributeController extends BaseController
                 'filters' => $filters
             ] = paginatedRequest();
 
-            $query = Attribute::with('attributeOptions:id,value,attribute_id')
-                ->filter($filters)
+            $query = Attribute::filter($filters)
                 ->search($searchKeyword);
+
+            if ($request->for_options) {
+                $query->select('name', 'id');
+            } else {
+                $query->with('attributeOptions:id,value,attribute_id');
+            }
 
             if ($showAllRecords) {
                 $attributes = $query->get();
@@ -178,6 +183,22 @@ class AttributeController extends BaseController
 
         } catch(Exception $e) {
             DB::rollBack();
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getOptionSelection(Request $request)
+    {
+        try {
+            $attributeId = $request->attribute_id;
+            $attribute = Attribute::with('attributeOptions:id,value,attribute_id')
+                    ->where('id', $attributeId)->first();
+
+            return $this->sendResponse($attribute->attributeOptions, 'Attribute option fetched');
+
+
+        } catch(Exception $e) {
 
             return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
         }
