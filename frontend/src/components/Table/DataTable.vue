@@ -11,6 +11,26 @@
         <q-inner-loading showing color="primary" />
       </template>
 
+      <template v-slot:body-cell-sku="props">
+        <q-chip
+          filled
+          color="grey-8"
+          text-color="white"
+          @click="copyToClipboard(props.row.code)"
+          clickable
+        >
+          <strong>{{ props.row.code }}</strong>
+          <q-tooltip>Click to copy</q-tooltip>
+
+        </q-chip>
+      </template>
+
+      <template v-slot:body-cell-variants="props">
+        <q-chip square dense filled v-for="(variant, index) in props.row.variants" :key="`attr-${index}`">
+          {{ variant.attribute.name }} : {{ variant.attribute_option.value }}
+        </q-chip>
+      </template>
+
       <template v-slot:body-cell-attribute_options="props">
         <q-td :props="props">
         <span v-if="props.row.attribute_options">
@@ -74,13 +94,11 @@
 
 import TableSkeleton from "components/skeleton/TableSkeleton.vue";
 import {capitalize} from "vue";
-import Cookies from "js-cookie";
+import {useCommonHelper} from "src/composables/useCommonHelper";
 
 const emit = defineEmits(['deleteItem', 'editItem'])
 
-const currentUserId = Cookies.get("user_id");
-const currentUserType = Cookies.get("user_type");
-// const currentUserId = cookieData.user_id
+const commonHelper = useCommonHelper()
 
 const props = defineProps({
   loading: {
@@ -89,8 +107,10 @@ const props = defineProps({
   },
 });
 
-console.log(props.loading)
 
+const copyToClipboard = (string) => {
+  commonHelper.copyToClipboard(string)
+}
 const deleteItem = (props) => {
   emit('deleteItem', props.row)
 }

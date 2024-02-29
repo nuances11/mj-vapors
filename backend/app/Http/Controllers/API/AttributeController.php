@@ -191,9 +191,10 @@ class AttributeController extends BaseController
     public function getOptionSelection(Request $request)
     {
         try {
-            $attributeId = $request->attribute_id;
+//            $attributeId = $request->attribute_id;
+            $attribute = $request->attribute;
             $attribute = Attribute::with('attributeOptions:id,value,attribute_id')
-                    ->where('id', $attributeId)->first();
+                    ->where('id', $attribute['id'])->first();
 
             return $this->sendResponse($attribute->attributeOptions, 'Attribute option fetched');
 

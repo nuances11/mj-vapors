@@ -20,7 +20,7 @@ class Sku extends Model implements Auditable
         'attributes_options'
     ];
 
-    protected $appends = ['variant'];
+    protected $appends = ['variants'];
 
     protected $casts = [
         'attributes_options' => 'json'
@@ -46,17 +46,37 @@ class Sku extends Model implements Auditable
 
     }
 
-    public function getVariantAttribute()
+    public function getVariantsAttribute()
     {
+//        return count($this->attributes_options);
+        $variant = [];
+//        $options = AttributeOption::with('attribute')
+        if (count($this->attributes_options) > 0) {
+            foreach ($this->attributes_options as $attrOption)
+            {
+//                return $attrOption;
+//                $option = AttributeOption::with('attribute')
+//                            ->where('id', $attrOption->attribute_option->id)
+////                            ->where('id', $attrOption['attribute_option']['id'])
+//                            ->first();
+//                $variant[] = [
+//                    'attribute' => $option->attribute->name,
+//                    'option' => $option->value
+//                ];
+                $variant[] = $attrOption;
+            }
+        }
 
-        return 'Test';
-
+        return $variant;
     }
 
     public function scopeSearch($query, $keyword)
     {
         $query->when($keyword !== '', function ($query) use ($keyword) {
-            $query->whereHas('product', function($q)  use ($keyword) {
+            $query->where(function ($query) use ($keyword) {
+                $query->whereRaw("code LIKE '%$keyword%'");
+            });
+            $query->orWhereHas('product', function($q)  use ($keyword) {
                 $q->whereRaw("name LIKE '%$keyword%'");
             });
         });

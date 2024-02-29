@@ -2,24 +2,35 @@ export function useProductHelper() {
   const getColumns = () => {
     return [
       {
+        name: "sku",
+        label: "SKU",
+        field: "code",
+        align: "left",
+      },
+      {
         name: "name",
         label: "Name",
-        field: "name",
+        field: row => row.product.name,
         align: "left",
         sortable: true,
-        style: "max-width: 200px",
       },
+      // {
+      //   name: "description",
+      //   label: "Description",
+      //   field: row => row.product.description,
+      //   align: "left",
+      // },
       {
-        name: "description",
-        label: "Description",
-        field: "description",
-        align: "left",
-      },
-      {
-        name: "product_variant",
+        name: "variants",
         label: "Variant",
         align: "left",
-        field: row => row.name,
+        field: "variants",
+      },
+      {
+        name: "price",
+        label: "Price",
+        align: "left",
+        field: "price",
       },
       {
         name: "actions",

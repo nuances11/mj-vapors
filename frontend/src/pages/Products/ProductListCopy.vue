@@ -163,25 +163,35 @@
                 <tbody>
                 <tr v-for="(option, index) in form.attribute_options" :key="`attr-${index}`">
                   <td>
-                    <AttributeSelection
-                      :key="componentKey"
-                      :index="index"
-                      :current-field="`attribute_${index}`"
+                    <q-select
+                      class="q-ma-xs"
+                      dense
+                      ref="attributeRef"
+                      v-model="form.attribute_options[index].attribute"
                       :options="attributeOptions"
                       :loading="attributeOptionsLoading"
-                      :initial-value="form.attribute_options[index]?.attribute"
-                      @new-input="updateAttributeValue"
+                      map-options
+                      option-label="name"
+                      label="Attribute"
+                      lazy-rules
+                      @update:model-value="getAttributeSelectionOptions"
+                      @input="testFn"
+                      :rules="[(v) => !!v || 'Please select something']"
                     />
                   </td>
                   <td>
-                    <AttributeOptionSelection
-                      :key="componentKey"
-                      :index="index"
-                      :current-field="`attribute_option_${index}`"
-                      :options="attributeSelectionOptions[index]"
-                      :loading="attributeSelectionOptionsLoading[index]"
-                      :initial-value="form.attribute_options[index]?.attribute_option"
-                      @new-input="updateAttributeValue"
+                    <q-select
+                      class="q-ma-xs"
+                      dense
+                      ref="attributeOptionRef"
+                      v-model="form.attribute_options[index].attribute_option"
+                      :options="attributeSelectionOptions"
+                      :loading="attributeSelectionOptionsLoading"
+                      map-options
+                      option-label="value"
+                      label="Options"
+                      lazy-rules
+                      :rules="[(v) => !!v || 'Please select something']"
                     />
                   </td>
                   <td class="text-center">
@@ -198,7 +208,7 @@
                     >
                       <q-tooltip>Add option field</q-tooltip>
                     </q-btn>
-                    <template v-if="form.attribute_options[index]?.id">
+                    <template v-if="form.attribute_options[index].id">
                       <q-btn
                         class="q-mr-xs q-pa-xs"
                         size="xs"
@@ -236,6 +246,8 @@
           </div>
         </q-card-section>
 
+        <!--      <q-separator />-->
+
         <q-card-actions align="right" class="dialog_bottom">
           <q-btn flat label="Submit" color="primary" type="submit" />
           <q-btn flat label="Cancel" color="primary" @click="closeProductFormDialog" />
@@ -258,8 +270,6 @@ import {useProductHelper} from "src/composables/useProductHelper";
 import {useProductRequest} from "src/composables/useProductRequest";
 import {useAttributeRequest} from "src/composables/useAttributeRequest";
 import {deepClone} from "src/helpers/common";
-import AttributeSelection from "components/product_attributes/AttributeSelection.vue";
-import AttributeOptionSelection from "components/product_attributes/AttributeOptionSelection.vue";
 
 const attributeRequest = useAttributeRequest()
 const productHelper = useProductHelper()
@@ -294,7 +304,7 @@ const statusOptions = ref([
 const attributeOptions = ref([])
 const attributeSelectionOptions = ref([])
 const attributeOptionsLoading = ref(false)
-const attributeSelectionOptionsLoading = ref([])
+const attributeSelectionOptionsLoading = ref(false)
 
 const form = ref({
   id: null,
@@ -307,18 +317,11 @@ const loading = ref(false);
 const productFormDialog = ref(false);
 const productFormRef = ref(null);
 const isAddMode = ref(false)
-const componentKey = ref(0);
+const attributeRef = ref([])
+const attributeOptionRef = ref([])
 
-const updateAttributeValue = async (data) => {
-  if (data.type === 'attribute') {
-    form.value.attribute_options[data.index].attribute = data.value;
-    let option = await getAttributeSelectionOptions(data.value, data.index);
-    attributeSelectionOptions.value.splice(data.index, 0, option)
-  } else if (data.type === 'attribute_option') {
-    form.value.attribute_options[data.index].attribute_option = data.value;
-  }
-
-  console.log('form', form.value)
+const testFn = (event) => {
+  console.log(event.target)
 }
 
 const fetchProductFormData = async (props) => {
@@ -329,6 +332,7 @@ const fetchProductFormData = async (props) => {
   form.value.name = data.product.name
   form.value.description = data.product.description
   form.value.attribute_options = data.attributes_options
+  console.log(data.attributes_options)
 
   return form.value
 }
@@ -414,14 +418,7 @@ const refreshList = async () => {
 }
 
 const removeAttributeOption = (index) => {
-  attributeSelectionOptions.value.splice(index, 1)
   form.value.attribute_options.splice(index, 1);
-  // delete form.value.attribute_options[index]
-  console.log(form.value)
-  console.log(attributeSelectionOptions.value)
-  componentKey.value++
-  // console.log('removeAttributeOption option', attributeSelectionOptions.value)
-  // console.log('removeAttributeOption form', form.value)
 }
 
 const closeProductFormDialog = () => {
@@ -443,22 +440,21 @@ const clearAttributeSelectionOptions = () => {
   attributeSelectionOptionsLoading.value = false;
 }
 
-const getAttributeSelectionOptions = async (value, index) => {
-
+const getAttributeSelectionOptions = async (value) => {
+  console.log('attributeRef', attributeRef.value)
+  console.log('attributeOptionRef', attributeOptionRef.value)
   if (!value) return
-  attributeSelectionOptionsLoading.value[index] = true;
+  attributeSelectionOptionsLoading.value = true;
   let query = {};
   query.display_all = true
   query.for_options = true
   query.attribute = value
   const { data } = await attributeRequest.getAttributeOptions(query);
   if (data) {
-    attributeSelectionOptionsLoading.value[index] = false;
-    return data
+    attributeSelectionOptions.value = data
   }
-  attributeSelectionOptionsLoading.value[index] = false;
 
-
+  attributeSelectionOptionsLoading.value = false;
 }
 const loadAttributes = async () => {
   attributeOptionsLoading.value = true;
@@ -516,6 +512,19 @@ watch(keyword, () => {
     pagination: pagination.value,
   });
 });
+
+watch(
+  () => form.value.attribute_options,
+  (value, oldValue, onCleanup) => {
+
+    if (typeof oldValue !== 'undefined' || typeof value !== 'undefined') {
+      let intersection = value.filter(x => oldValue.includes(x));
+      console.log('intersection', intersection)
+    }
+
+  },
+  { deep: true }
+);
 
 
 watch(

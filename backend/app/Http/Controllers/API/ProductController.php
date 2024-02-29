@@ -56,6 +56,7 @@ class ProductController extends BaseController
      */
     public function store(Request $request)
     {
+//        return response()->json($request->all());
         DB::beginTransaction();
         try {
             $data = $request->all();
