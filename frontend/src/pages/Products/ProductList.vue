@@ -148,8 +148,8 @@
             />
 
               <div class="text-h6">Attribute Options</div>
-
               <q-separator />
+            {{filteredAttributeOptions}}
 
               <q-markup-table flat class="q-mt-md">
                 <thead>
@@ -164,10 +164,10 @@
                 <tr v-for="(option, index) in form.attribute_options" :key="`attr-${index}`">
                   <td>
                     <AttributeSelection
-                      :key="componentKey"
+                      :key="attributeComponentKey"
                       :index="index"
                       :current-field="`attribute_${index}`"
-                      :options="attributeOptions"
+                      :options="filteredAttributeOptions"
                       :loading="attributeOptionsLoading"
                       :initial-value="form.attribute_options[index]?.attribute"
                       @new-input="updateAttributeValue"
@@ -175,7 +175,8 @@
                   </td>
                   <td>
                     <AttributeOptionSelection
-                      :key="componentKey"
+                      ref="attributeOptionSelectionRef"
+                      :key="attributeOptionsComponentKey"
                       :index="index"
                       :current-field="`attribute_option_${index}`"
                       :options="attributeSelectionOptions[index]"
@@ -187,7 +188,7 @@
                   <td class="text-center">
 
                     <q-btn
-                      v-if="index === (form.attribute_options.length - 1)"
+                      v-if="index === (form.attribute_options.length - 1) && filteredAttributeOptions.length > 0"
                       @click="addAttributeOption"
                       class="q-mr-xs q-pa-xs"
                       size="xs"
@@ -252,7 +253,7 @@
 <script setup>
 
 import {useQuasar} from "quasar";
-import {capitalize, onMounted, reactive, ref, watch} from "vue";
+import {capitalize, computed, onMounted, reactive, ref, watch} from "vue";
 import DataTable from "components/Table/DataTable.vue";
 import {useProductHelper} from "src/composables/useProductHelper";
 import {useProductRequest} from "src/composables/useProductRequest";
@@ -307,22 +308,27 @@ const loading = ref(false);
 const productFormDialog = ref(false);
 const productFormRef = ref(null);
 const isAddMode = ref(false)
-const componentKey = ref(0);
+const attributeComponentKey = ref(0);
+const attributeOptionsComponentKey = ref(0);
+const attributeOptionSelectionRef = ref(null);
 
 const updateAttributeValue = async (data) => {
+
   if (data.type === 'attribute') {
     form.value.attribute_options[data.index].attribute = data.value;
+
+    form.value.attribute_options[data.index].attribute_option = null;
+    attributeOptionsComponentKey.value++
+    // attributeOptionSelectionRef.value[data.index].reset()
     let option = await getAttributeSelectionOptions(data.value, data.index);
     attributeSelectionOptions.value.splice(data.index, 0, option)
   } else if (data.type === 'attribute_option') {
     form.value.attribute_options[data.index].attribute_option = data.value;
   }
-
-  console.log('form', form.value)
 }
 
 const fetchProductFormData = async (props) => {
-  console.log(props);
+
   let data = deepClone(props)
   form.value.id = data.id
   form.value.price = data.price
@@ -339,8 +345,18 @@ const editProduct = async (props) => {
     form.value = await fetchProductFormData(props)
   })
 
+  let attributeIds = [];
+  if (form.value.attribute_options.length > 0) {
+    form.value.attribute_options.forEach((attr, index) => {
+      attributeIds.push(parseInt(attr['attribute']?.id))
+    })
+  }
+
+  attributeOptions.value.filter(function (attr) {
+    return !attributeIds.includes(attr.id)
+  });
+
   formTitle.value = 'Update Product'
-  // userForm.value = commonHelper.deepClone(props)
   isAddMode.value = false;
   productFormDialog.value = true;
 }
@@ -348,7 +364,11 @@ const editProduct = async (props) => {
 const submitForm = async () => {
   console.log(isAddMode.value)
   if (isAddMode.value) await saveProduct()
-  // else await updateProduct()
+  else await updateProduct()
+}
+
+const updateProduct = async () => {
+
 }
 
 const checkAttributeEntry = async () => {
@@ -419,7 +439,8 @@ const removeAttributeOption = (index) => {
   // delete form.value.attribute_options[index]
   console.log(form.value)
   console.log(attributeSelectionOptions.value)
-  componentKey.value++
+  attributeComponentKey.value++
+  attributeOptionsComponentKey.value++
   // console.log('removeAttributeOption option', attributeSelectionOptions.value)
   // console.log('removeAttributeOption form', form.value)
 }
@@ -516,6 +537,21 @@ watch(keyword, () => {
     pagination: pagination.value,
   });
 });
+
+const filteredAttributeOptions = computed(() => {
+  let attributeIds = [];
+
+  if (form.value.attribute_options.length > 0) {
+    form.value.attribute_options.forEach((attr, index) => {
+      attributeIds.push(parseInt(attr['attribute']?.id))
+    })
+  }
+
+  return attributeOptions.value.filter(function (attr) {
+    return !attributeIds.includes(attr.id);
+  });
+
+})
 
 
 watch(
