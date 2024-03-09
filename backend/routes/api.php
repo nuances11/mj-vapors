@@ -5,6 +5,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BranchController;
 use App\Http\Controllers\API\InventoryController;
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\SkuController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('attributes', AttributeController::class);
     Route::apiResource('products', ProductController::class);
     Route::apiResource('inventories', InventoryController::class);
+    Route::apiResource('listings', SkuController::class);
 });
 
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

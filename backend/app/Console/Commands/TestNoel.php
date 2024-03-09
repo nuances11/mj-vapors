@@ -33,44 +33,19 @@ class TestNoel extends Command
         DB::beginTransaction();
 
         try {
-            // Create Product
-            $product = Product::create([
-                'name' => 'Test Product 2',
-                'slug' => Str::slug('Test Product 2'),
-                'description' => 'Test Description'
-            ]);
+            $product = Product::findOrFail(1);
+            $sku = Sku::findOrFail(1);
+            $defaultStr = (string) $product->id;
+            foreach($sku->attributes_options as $option) {
+                dump($option);
+                $defaultStr += $option['attribute']['id'];
+                $defaultStr += $option['attribute_option']['id'];
+            }
 
-            dump($product);
+            $code = str_pad(Str::uuid(), 8, '0', STR_PAD_LEFT);
+            dump("MJV-" . Str::uuid());
+            dump(Str::upper(Str::random()));
 
-            // Create SKU
-            $skuPrefix = "MJV";
-            $skuNumber = Str::upper(Str::random(8));
-
-            $code = "$skuPrefix-$skuNumber";
-
-            $product->skus()->create([
-                'code' => $code,
-                'price' => 10.33
-            ]);
-            $product->refresh();
-
-            dump($product->skus);
-
-            $productSku = Sku::with('attributeOptions')->latest()->first();
-            $attributeOptions = AttributeOption::latest()->first();
-
-            $productSku->attributeOptions()->attach($attributeOptions->id);
-
-            $productSku->refresh();
-
-            dump($productSku);
-
-
-
-            // Attach SKU to attribute options
-
-
-//            DB::rollBack();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

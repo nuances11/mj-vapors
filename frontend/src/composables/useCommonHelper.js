@@ -72,9 +72,20 @@ export function useCommonHelper() {
     return targetObj;
   }
 
+  const defaultPagination = () => {
+    return {
+      sortBy: "created_at",
+      descending: false,
+      page: 1,
+      rowsPerPage: 10,
+      rowsNumber: 10,
+    }
+  }
+
   return {
     useGeneratePassword,
     copyToClipboard,
-    deepClone
+    deepClone,
+    defaultPagination
   }
 }

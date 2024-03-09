@@ -32,7 +32,7 @@ class ProductController extends BaseController
                 'filters' => $filters
             ] = paginatedRequest();
 
-            $query = Sku::with(['product'])
+            $query = Product::query()
                 ->filter($filters)
                 ->search($searchKeyword);
 
@@ -57,42 +57,7 @@ class ProductController extends BaseController
      */
     public function store(Request $request)
     {
-        DB::beginTransaction();
-        try {
-            $data = $request->all();
-            $name = $data['name'];
-            $slug = generateSlug($name);
-            $product = Product::where('slug', $slug)->first();
-            if ($product) {
-                DB::rollBack();
-                return $this->sendError('Product name already exist.', [
-                    'error' => 'Product name already exist.'
-                ], 403);
-            } else {
-                $product = new Product();
-                $product->name = $name;
-                $product->slug = $slug;
-                $product->description = $data['description'];
-                $product->save();
-                $product->refresh();
 
-                $sku = new Sku();
-                $sku->code = (string)$this->generateSku($product->id);
-                $sku->price = $data['price'];
-                $sku->attributes_options = $data['attribute_options'];
-
-                $product->skus()->save($sku);
-
-                DB::commit();
-            }
-
-            return $this->sendResponse($product, 'Product created');
-
-        } catch(Exception $e) {
-            DB::rollBack();
-
-            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
-        }
     }
 
     /**
@@ -108,44 +73,7 @@ class ProductController extends BaseController
      */
     public function update(Request $request, $id)
     {
-        DB::beginTransaction();
-        try {
-            $data = $request->all();
-            $name = $data['name'];
-            $slug = generateSlug($name);
 
-            $data = array_merge($data, [
-                'slug' => $slug
-            ]);
-
-            $product = Product::where('slug', $slug)->whereNot('id', $id)->first();
-            if ($product) {
-                DB::rollBack();
-                return $this->sendError('Product name already exist.', [
-                    'error' => 'Product name already exist.'
-                ], 403);
-            } else {
-                $product = Product::findOrFail($id);
-                $toUpdateProduct = Arr::only($data, [
-                    'name', 'description', 'slug'
-                ]);
-                $product->update($toUpdateProduct);
-
-                $product->skus()->update([
-                    'price' => $data['price'],
-                    'attributes_options' => $data['attribute_options'],
-                ]);
-
-                DB::commit();
-            }
-
-            return $this->sendResponse($product, 'Product created');
-
-        } catch(Exception $e) {
-            DB::rollBack();
-
-            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
-        }
     }
 
     /**
@@ -154,21 +82,7 @@ class ProductController extends BaseController
     public function destroy($id)
     {
 
-        DB::beginTransaction();
-        try {
 
-            $product = Product::findOrFail($id);
-            $product->skus()->delete();
-            $product->delete();
-
-            DB::commit();
-            return $this->sendResponse([], 'Product deleted.');
-
-        } catch(Exception $e) {
-            DB::rollBack();
-
-            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
-        }
     }
 
     public function filterProductByAttributeOptions(Request $request)
@@ -190,10 +104,5 @@ class ProductController extends BaseController
         })->count();*/
     }
 
-    private function generateSku($id): string
-    {
-//        $code = Str::upper(Str::random(10));
-        $code = str_pad($id, 8, '0', STR_PAD_LEFT);
-        return "MJV-" . $code;
-    }
+
 }
