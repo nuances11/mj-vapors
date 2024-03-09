@@ -12,23 +12,43 @@
       </template>
 
       <template v-slot:body-cell-sku="props">
-        <q-chip
-          filled
-          color="grey-8"
-          text-color="white"
-          @click="copyToClipboard(props.row.code)"
-          clickable
-        >
-          <strong>{{ props.row.code }}</strong>
-          <q-tooltip>Click to copy</q-tooltip>
+        <q-td :props="props">
+          <q-chip
+            filled
+            color="grey-8"
+            text-color="white"
+            @click="copyToClipboard(props.row.code)"
+            clickable
+          >
+            <strong>{{ props.row.code }}</strong>
+            <q-tooltip>Click to copy</q-tooltip>
 
-        </q-chip>
+          </q-chip>
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-product_sku="props">
+        <q-td :props="props">
+          <q-chip
+            filled
+            color="grey-8"
+            text-color="white"
+            @click="copyToClipboard(props.row.product_sku)"
+            clickable
+          >
+            <strong>{{ props.row.product_sku }}</strong>
+            <q-tooltip>Click to copy</q-tooltip>
+
+          </q-chip>
+        </q-td>
       </template>
 
       <template v-slot:body-cell-variants="props">
-        <q-chip square dense filled v-for="(variant, index) in props.row.variants" :key="`attr-${index}`">
-          {{ variant.attribute.name }} : {{ variant.attribute_option.value }}
-        </q-chip>
+        <q-td :props="props">
+          <q-chip square dense filled v-for="(variant, index) in props.row.variants" :key="`attr-${index}`">
+            {{ variant.attribute.name }} : {{ variant.attribute_option.value }}
+          </q-chip>
+        </q-td>
       </template>
 
       <template v-slot:body-cell-attribute_options="props">

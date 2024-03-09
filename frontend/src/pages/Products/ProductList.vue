@@ -149,7 +149,6 @@
 
               <div class="text-h6">Attribute Options</div>
               <q-separator />
-            {{filteredAttributeOptions}}
 
               <q-markup-table flat class="q-mt-md">
                 <thead>
@@ -312,6 +311,37 @@ const attributeComponentKey = ref(0);
 const attributeOptionsComponentKey = ref(0);
 const attributeOptionSelectionRef = ref(null);
 
+const deleteProduct = async (props) => {
+  loading.value = true
+  $q.dialog({
+    title: 'Delete Record',
+    message: `Are you sure you want to delete <strong>${props.product.name}</strong>?`,
+    cancel: true,
+    persistent: true,
+    html: true
+  }).onOk(async () => {
+    await productRequest.deleteProduct(props.id)
+      .then((response) => {
+        if (!response.success) {
+          $q.notify({
+            type: "negative",
+            icon: 'report_problem',
+            message: response.message,
+          });
+        } else {
+          $q.notify({
+            type: "positive",
+            icon: 'check_circle',
+            message: response.message,
+          });
+          refreshList()
+        }
+      });
+
+    loading.value = false
+  })
+}
+
 const updateAttributeValue = async (data) => {
 
   if (data.type === 'attribute') {
@@ -319,7 +349,7 @@ const updateAttributeValue = async (data) => {
 
     form.value.attribute_options[data.index].attribute_option = null;
     attributeOptionsComponentKey.value++
-    // attributeOptionSelectionRef.value[data.index].reset()
+
     let option = await getAttributeSelectionOptions(data.value, data.index);
     attributeSelectionOptions.value.splice(data.index, 0, option)
   } else if (data.type === 'attribute_option') {
@@ -362,12 +392,51 @@ const editProduct = async (props) => {
 }
 
 const submitForm = async () => {
-  console.log(isAddMode.value)
   if (isAddMode.value) await saveProduct()
   else await updateProduct()
 }
 
 const updateProduct = async () => {
+  const result = await productFormRef.value.validate();
+  console.log(result)
+  if (!!!result) {
+    return;
+  }
+
+  let validateAttributeEntry = await checkAttributeEntry()
+  if (!validateAttributeEntry) return
+
+  loading.value = true;
+  try {
+    await productRequest.updateProduct(form.value.id, form.value)
+      .then((response) => {
+        if (!response.success) {
+          $q.notify({
+            type: "negative",
+            icon: 'report_problem',
+            message: response.message,
+          });
+        } else {
+          $q.notify({
+            type: "positive",
+            icon: 'check_circle',
+            message: response.message,
+          });
+          refreshForm()
+          productFormDialog.value = false;
+          refreshList()
+        }
+        loading.value = true;
+      });
+
+  } catch (error) {
+    console.log(error?.response?.statusText)
+    $q.notify({
+      type: "negative",
+      icon: 'report_problem',
+      message: error?.response?.statusText,
+    });
+  }
 
 }
 
@@ -436,13 +505,9 @@ const refreshList = async () => {
 const removeAttributeOption = (index) => {
   attributeSelectionOptions.value.splice(index, 1)
   form.value.attribute_options.splice(index, 1);
-  // delete form.value.attribute_options[index]
-  console.log(form.value)
-  console.log(attributeSelectionOptions.value)
+
   attributeComponentKey.value++
   attributeOptionsComponentKey.value++
-  // console.log('removeAttributeOption option', attributeSelectionOptions.value)
-  // console.log('removeAttributeOption form', form.value)
 }
 
 const closeProductFormDialog = () => {

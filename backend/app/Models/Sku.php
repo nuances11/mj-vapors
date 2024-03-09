@@ -48,25 +48,15 @@ class Sku extends Model implements Auditable
 
     public function getVariantsAttribute()
     {
-//        return count($this->attributes_options);
         $variant = [];
-//        $options = AttributeOption::with('attribute')
-        if (count($this->attributes_options) > 0) {
-            foreach ($this->attributes_options as $attrOption)
-            {
-//                return $attrOption;
-//                $option = AttributeOption::with('attribute')
-//                            ->where('id', $attrOption->attribute_option->id)
-////                            ->where('id', $attrOption['attribute_option']['id'])
-//                            ->first();
-//                $variant[] = [
-//                    'attribute' => $option->attribute->name,
-//                    'option' => $option->value
-//                ];
-                $variant[] = $attrOption;
+        if ($this->attributes_options) {
+            if (count($this->attributes_options) > 0) {
+                foreach ($this->attributes_options as $attrOption)
+                {
+                    $variant[] = $attrOption;
+                }
             }
         }
-
         return $variant;
     }
 

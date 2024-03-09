@@ -30,6 +30,16 @@ const routes = [
         component: () => import('pages/Branches/BranchList.vue'),
         meta: { breadCrumb: "Branches" },
       },
+      {
+        path: '/inventory',
+        component: () => import('pages/Inventory/InventoryList.vue'),
+        meta: { breadCrumb: "Inventory" },
+      },
+      {
+        path: '/transactions',
+        component: () => import('pages/Transactions/TransactionDashboard.vue'),
+        meta: { breadCrumb: "Transactions" },
+      },
     ],
     meta: {
       requiresAuth: true,

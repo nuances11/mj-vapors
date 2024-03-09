@@ -12,7 +12,6 @@
         />
 
         <q-btn flat no-caps no-wrap class="q-ml-xs" v-if="$q.screen.gt.xs">
-<!--          <q-icon :name="fabYoutube" color="red" size="28px" />-->
           <img
             alt="Theme logo"
             src="~assets/logo.jpg"
@@ -71,17 +70,30 @@
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
-      bordered
       class="bg-grey-9 text-white"
       :width="240"
     >
       <q-scroll-area class="fit">
         <q-list padding>
+          <q-item
+            v-ripple
+            clickable
+            to="/transactions"
+            class="text-subtitle1"
+          >
+            <q-item-section avatar>
+              <q-icon size="medium" name="fa-solid fa-dollar" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Transactions</q-item-label>
+            </q-item-section>
+          </q-item>
           <q-expansion-item
             :content-inset-level="0.5"
             expand-separator
             icon="fa-solid fa-bag-shopping"
             label="Products"
+            class="text-medium"
             >
 
               <q-item
@@ -91,7 +103,7 @@
                 class="text-subtitle1 color-white"
               >
                 <q-item-section avatar>
-                  <q-icon color="grey" name="fa-solid fa-rectangle-list" />
+                  <q-icon size="medium" color="grey" name="fa-solid fa-rectangle-list" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>List</q-item-label>
@@ -105,7 +117,7 @@
               class="text-subtitle1 color-white"
             >
               <q-item-section avatar>
-                <q-icon color="grey" name="fa-solid fa-filter-circle-dollar" />
+                <q-icon size="medium" color="grey" name="fa-solid fa-filter-circle-dollar" />
               </q-item-section>
               <q-item-section>
                 <q-item-label>Attributes</q-item-label>
@@ -119,7 +131,7 @@
             class="text-subtitle1 color-white"
           >
             <q-item-section avatar>
-              <q-icon name="fa-solid fa-users" />
+              <q-icon size="medium" name="fa-solid fa-users" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Users</q-item-label>
@@ -132,10 +144,23 @@
             class="text-subtitle1 color-white"
           >
             <q-item-section avatar>
-              <q-icon name="fa-solid fa-store" />
+              <q-icon size="medium" name="fa-solid fa-store" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Branches</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item
+            v-ripple
+            clickable
+            to="/inventory"
+            class="text-subtitle1 color-white"
+          >
+            <q-item-section avatar>
+              <q-icon size="medium" name="fa-solid fa-warehouse" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Inventory</q-item-label>
             </q-item-section>
           </q-item>
 
@@ -152,7 +177,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import {computed, defineComponent, ref} from 'vue'
 import { fabYoutube } from '@quasar/extras/fontawesome-v6'
 import { useQuasar } from "quasar";
 import Cookies from "js-cookie";
@@ -173,11 +198,7 @@ export default defineComponent({
     const route = useRoute()
     const first_name = Cookies.get('user_first_name');
 
-    // $q.loadingBar.setDefaults({
-    //   color: 'red',
-    //   size: '15px',
-    //   position: 'top'
-    // })
+    const currentPath = computed(() =>route.path)
 
     function toggleLeftDrawer() {
       leftDrawerOpen.value = !leftDrawerOpen.value
@@ -218,6 +239,7 @@ export default defineComponent({
 
     return {
       fabYoutube,
+      currentPath,
 
       leftDrawerOpen,
       search,
@@ -225,52 +247,33 @@ export default defineComponent({
 
       toggleLeftDrawer,
       logout,
-
-      links1: [
-        {icon: 'fa-solid fa-cash-register', text: 'SALES', to: '#'},
-        {icon: 'fa-solid fa-dolly', text: 'Products', to: '/products'},
-        {icon: 'fa-solid fa-users', text: 'Users', to: '#'}
-      ],
-      links2: [
-        {icon: 'folder', text: 'Library'},
-        {icon: 'restore', text: 'History'},
-        {icon: 'watch_later', text: 'Watch later'},
-        {icon: 'thumb_up_alt', text: 'Liked videos'}
-      ],
-      links3: [
-        {icon: fabYoutube, text: 'YouTube Premium'},
-        {icon: 'local_movies', text: 'Movies & Shows'},
-        {icon: 'videogame_asset', text: 'Gaming'},
-        {icon: 'live_tv', text: 'Live'}
-      ],
-      links4: [
-        {icon: 'settings', text: 'Settings'},
-        {icon: 'flag', text: 'Report history'},
-        {icon: 'help', text: 'Help'},
-        {icon: 'feedback', text: 'Send feedback'}
-      ],
-      buttons1: [
-        {text: 'About'},
-        {text: 'Press'},
-        {text: 'Copyright'},
-        {text: 'Contact us'},
-        {text: 'Creators'},
-        {text: 'Advertise'},
-        {text: 'Developers'}
-      ],
-      buttons2: [
-        {text: 'Terms'},
-        {text: 'Privacy'},
-        {text: 'Policy & Safety'},
-        {text: 'Test new features'}
-      ]
     }
   }
 })
 </script>
 <style lang="sass">
+.text-medium i
+  font-size: medium !important
+
+.q-item.q-router-link--active
+  color: #e9ad03
+  font-weight: bold
+  background: #fafafa
+  border-left: none
+
+.active-menu
+  background: #fafafa
+  border-left: none
+
+.color-coin
+  color: #e9ad03
+  font-weight: bold
+  background: #fafafa
+  border-left: none
+
 .main_wrap
   padding: 30px
+  border: 0
 
 .YL
 

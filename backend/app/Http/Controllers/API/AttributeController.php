@@ -111,8 +111,6 @@ class AttributeController extends BaseController
      */
     public function update(Request $request, $id)
     {
-//        $collection = collect($request->options);
-//        return response()->json($collection);
 
         DB::beginTransaction();
         try {
@@ -124,10 +122,6 @@ class AttributeController extends BaseController
                 DB::rollBack();
                 return $this->sendError('Attribute name already exist.', ['error' => 'Attribute name already exist.'], 403);
             } else {
-//                $attribute = Attribute::update([
-//                    'name' => $name,
-//                    'slug' => $slug
-//                ]);
                 $attribute = Attribute::findOrFail($data['id']);
                 $attribute->name = $name;
                 $attribute->slug = $slug;
