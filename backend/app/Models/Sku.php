@@ -23,7 +23,7 @@ class Sku extends Model implements Auditable
     protected $appends = ['variants'];
 
     protected $casts = [
-        'attributes_options' => 'json'
+        'attributes_options' => 'array'
     ];
 
     public function getPriceAttribute($value)

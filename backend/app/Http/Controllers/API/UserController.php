@@ -34,11 +34,14 @@ class UserController extends BaseController
             $query = User::search($searchKeyword)
                 ->filter($filters);
 
-
-            $users = $query->paginate($pageLimit);
+            if ($request->for_transaction) {
+                $query->whereNot('id', Auth::user()->id);
+            }
 
             if ($showAllRecords) {
                 $users = $query->get();
+            } else {
+                $users = $query->paginate($pageLimit);
             }
 
             return JsonResource::collection($users);

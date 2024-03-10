@@ -64,43 +64,56 @@ class   SkuController extends BaseController
 
             // Check if there is existing product listing
             $exist = Sku::where('product_id', $data['product_id'])
-                        ->whereJsonContains('attributes_options', $data['attribute_options'])
-                        ->first();
+//                        ->where('attributes_options', $data['attribute_options'])
+                        ->get();
 
+            $duplicates = 0;
             if ($exist) {
 
-                DB::rollBack();
-                return $this->sendError('Product listing already exist.', [
-                    'error' => 'Product listing already exist.'
-                ], 403);
-
-            } else {
-                $product = Product::findOrFail($data['product_id']);
-
-                if ($product) {
-                    $sku = new Sku();
-                    $sku->price = $data['price'];
-                    $sku->attributes_options = $data['attribute_options'];
-
-                    $product->skus()->save($sku);
-                    $latest = $product->skus()->latest()->first();
-
-                    $latest->update([
-                        'code' => $this->generateSku($product->id, $latest->id)
-                    ]);
-
-                    DB::commit();
-
-                    return $this->sendResponse($product, 'Listing created');
-
-                } else {
-
-                    DB::rollBack();
-                    return $this->sendError('Product not found.', [
-                        'error' => 'Product not found.'
-                    ], 403);
-
+                foreach ($exist as $item) {
+                    if ($item->attributes_options === $data['attribute_options']) {
+                        $duplicates++;
+                    }
                 }
+
+                if ($duplicates > 0) {
+                    DB::rollBack();
+                    return $this->sendError('Product listing already exist.', [
+                        'error' => 'Product listing already exist.'
+                    ], 403);
+                } else {
+                    $product = Product::findOrFail($data['product_id']);
+
+                    if ($product) {
+                        $sku = new Sku();
+                        $sku->price = $data['price'];
+                        $sku->attributes_options = $data['attribute_options'];
+
+                        $product->skus()->save($sku);
+                        $latest = $product->skus()->latest()->first();
+
+                        $latest->update([
+                            'code' => $this->generateSku($product->id, $latest->id)
+                        ]);
+
+                        DB::commit();
+
+                        return $this->sendResponse($product, 'Listing created');
+
+                    } else {
+
+                        DB::rollBack();
+                        return $this->sendError('Product not found.', [
+                            'error' => 'Product not found.'
+                        ], 403);
+
+                    }
+                }
+            } else {
+                DB::rollBack();
+                return $this->sendError('No product found.', [
+                    'error' => 'No product found.'
+                ], 403);
             }
 
         } catch(Exception $e) {

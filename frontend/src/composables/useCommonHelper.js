@@ -82,10 +82,27 @@ export function useCommonHelper() {
     }
   }
 
+  const numberFormat = (value, decimal) => {
+    if (typeof decimal === "undefined") {
+      decimal = 2;
+    }
+
+    if (typeof value !== "undefined" && value !== null) {
+      value = parseFloat(value).toFixed(decimal);
+      let parts = value.split(".");
+      return (
+        parts[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") +
+        (parts[1] ? "." + parts[1] : "")
+      );
+    }
+    return 0.0;
+  }
+
   return {
     useGeneratePassword,
     copyToClipboard,
     deepClone,
-    defaultPagination
+    defaultPagination,
+    numberFormat
   }
 }

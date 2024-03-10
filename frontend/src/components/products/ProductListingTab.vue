@@ -484,10 +484,11 @@ const saveProductListing = async () => {
           productListingFormDialog.value = false;
           refreshList()
         }
-        loading.value = true;
+        loading.value = false;
       });
 
   } catch (error) {
+    loading.value = false;
     $q.notify({
       type: "negative",
       icon: 'report_problem',
@@ -513,6 +514,7 @@ const removeAttributeOption = (index) => {
 const closeProductListingFormDialog = () => {
   refreshListingForm();
   productListingFormDialog.value = false;
+  loading.value = false
 }
 
 const refreshListingForm = () => {

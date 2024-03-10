@@ -41,64 +41,10 @@
 
 <script setup>
 
-import {useQuasar} from "quasar";
-import {capitalize, computed, onMounted, reactive, ref, watch} from "vue";
-import {useProductRequest} from "src/composables/useProductRequest";
-import {useAttributeRequest} from "src/composables/useAttributeRequest";
-import {deepClone} from "src/helpers/common";
-import {useListingHelper} from "src/composables/useListingHelper";
+import {ref} from "vue";
 import ProductTab from "components/products/ProductTab.vue";
 import ProductListingTab from "components/products/ProductListingTab.vue";
 
-
-const productFormTitle = ref('Add Product')
-const pagination = ref({
-  sortBy: "created_at",
-  descending: false,
-  page: 1,
-  rowsPerPage: 10,
-  rowsNumber: 10,
-});
-const filters = reactive({
-  status: null,
-});
-
-const statusOptions = ref([
-  {
-    label: 'Active',
-    value: 'active',
-  },
-  {
-    label: 'Inactive',
-    value: 'inactive',
-  },
-]);
-const attributeOptions = ref([])
-const attributeSelectionOptions = ref([])
-const attributeOptionsLoading = ref(false)
-const attributeSelectionOptionsLoading = ref([])
-
-const productForm = ref({
-  id: null,
-  name: '',
-  description: '',
-})
-
-const form = ref({
-  id: null,
-  price: 0,
-  product_id: null,
-  attribute_options: [],
-})
-const loading = ref(false);
-const productListingFormDialog = ref(false);
-const productFormDialog = ref(false);
-const productListingFormRef = ref(null);
-const isAddMode = ref(false)
-const isAddProductMode = ref(false)
-const attributeComponentKey = ref(0);
-const attributeOptionsComponentKey = ref(0);
-const attributeOptionSelectionRef = ref(null);
 const tab = ref('products')
 
 

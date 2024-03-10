@@ -13,12 +13,17 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('skus_id')->constrained('skus')->cascadeOnDelete();
+            $table->unsignedBigInteger('branch_id');
+            $table->unsignedBigInteger('user_id');
             $table->string('transaction_type');
-            $table->integer('quantity')->default(1);
+            $table->string('reference_number')->nullable();
+            $table->decimal('total_amount', 10, 2);
             $table->timestamps();
+            $table->enum('status', ['success', 'voided', 'cancelled']);
             $table->softDeletes();
+
+            $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
