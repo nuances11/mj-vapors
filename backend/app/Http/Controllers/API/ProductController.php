@@ -57,7 +57,41 @@ class ProductController extends BaseController
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
+        try {
+            $data = $request->all();
+            $name = $data['name'];
+            $slug = Str::slug($name);
 
+            // Check if there is existing product listing
+            $exist = Product::where('slug', $slug)
+                ->first();
+
+            if ($exist) {
+
+                DB::rollBack();
+                return $this->sendError('Product already exist.', [
+                    'error' => 'Product already exist.'
+                ], 403);
+
+            } else {
+                $product = new Product();
+                $product->name = $name;
+                $product->slug = $slug;
+                $product->description = $data['description'];
+                $product->save();
+
+                DB::commit();
+
+                return $this->sendResponse($product, 'Product created');
+
+            }
+
+        } catch(Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -73,7 +107,43 @@ class ProductController extends BaseController
      */
     public function update(Request $request, $id)
     {
+        DB::beginTransaction();
+        try {
+            $data = $request->all();
+            $name = $data['name'];
+            $slug = Str::slug($name);
 
+            // Check if there is existing product listing
+            $exist = Product::where('slug', $slug)
+                ->whereNot('id', $id)
+                ->first();
+
+            if ($exist) {
+
+                DB::rollBack();
+                return $this->sendError('Product already exist.', [
+                    'error' => 'Product already exist.'
+                ], 403);
+
+            } else {
+                $product = Product::findOrFail($id);
+                $product->update([
+                    'name' => $name,
+                    'slug' => $slug,
+                    'description' => $data['description']
+                ]);
+
+                DB::commit();
+
+                return $this->sendResponse($product, 'Product updated');
+
+            }
+
+        } catch(Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -81,7 +151,20 @@ class ProductController extends BaseController
      */
     public function destroy($id)
     {
+        DB::beginTransaction();
+        try {
 
+            $sku = Product::findOrFail($id);
+            $sku->delete();
+
+            DB::commit();
+            return $this->sendResponse([], 'Product deleted.');
+
+        } catch(Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
 
     }
 

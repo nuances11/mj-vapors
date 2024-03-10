@@ -14,7 +14,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class SkuController extends BaseController
+class   SkuController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -83,12 +83,15 @@ class SkuController extends BaseController
                     $sku->attributes_options = $data['attribute_options'];
 
                     $product->skus()->save($sku);
+                    $latest = $product->skus()->latest()->first();
 
-                    return response()->json($product->skus()->latest()->take(1));
+                    $latest->update([
+                        'code' => $this->generateSku($product->id, $latest->id)
+                    ]);
 
-//                    DB::commit();
+                    DB::commit();
 
-                    return $this->sendResponse($product, 'Product created');
+                    return $this->sendResponse($product, 'Listing created');
 
                 } else {
 
@@ -123,27 +126,20 @@ class SkuController extends BaseController
         DB::beginTransaction();
         try {
             $data = $request->all();
-            $name = $data['name'];
-            $slug = generateSlug($name);
 
-            $data = array_merge($data, [
-                'slug' => $slug
-            ]);
-
-            $product = Product::where('slug', $slug)->whereNot('id', $id)->first();
-            if ($product) {
+            $exist = Sku::where('product_id', $data['product_id'])
+                ->whereJsonContains('attributes_options', $data['attribute_options'])
+                ->whereNot('id', $id)
+                ->first();
+            if ($exist) {
                 DB::rollBack();
-                return $this->sendError('Product name already exist.', [
-                    'error' => 'Product name already exist.'
+                return $this->sendError('Product listing already exist.', [
+                    'error' => 'Product listing already exist.'
                 ], 403);
             } else {
-                $product = Product::findOrFail($id);
-                $toUpdateProduct = Arr::only($data, [
-                    'name', 'description', 'slug'
-                ]);
-                $product->update($toUpdateProduct);
+                $sku = Sku::findOrFail($id);
 
-                $product->skus()->update([
+                $sku->update([
                     'price' => $data['price'],
                     'attributes_options' => $data['attribute_options'],
                 ]);
@@ -151,7 +147,7 @@ class SkuController extends BaseController
                 DB::commit();
             }
 
-            return $this->sendResponse($product, 'Product created');
+            return $this->sendResponse($sku, 'Product updated');
 
         } catch(Exception $e) {
             DB::rollBack();
@@ -168,12 +164,11 @@ class SkuController extends BaseController
         DB::beginTransaction();
         try {
 
-            $product = Product::findOrFail($id);
-            $product->skus()->delete();
-            $product->delete();
+            $sku = Sku::findOrFail($id);
+            $sku->delete();
 
             DB::commit();
-            return $this->sendResponse([], 'Product deleted.');
+            return $this->sendResponse([], 'Listing deleted.');
 
         } catch(Exception $e) {
             DB::rollBack();
@@ -184,8 +179,7 @@ class SkuController extends BaseController
 
     private function generateSku($id, $sku): string
     {
-//        $code = str_pad($id, 8, '0', STR_PAD_LEFT);
         $code = Str::upper(Str::random());
-        return "MJV-" . $code . '-' . $id . $sku->id;
+        return "MJV-" . $code . '-' . $id . $sku;
     }
 }

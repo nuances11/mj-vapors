@@ -303,12 +303,17 @@ const attributeSelectionOptions = ref([])
 const attributeOptionsLoading = ref(false)
 const attributeSelectionOptionsLoading = ref([])
 const productOptions = ref([])
+const hasFilters = computed(() => {
+  return (
+    filters.status !== null
+  );
+});
 
 const deleteListing = async (props) => {
   loading.value = true
   $q.dialog({
     title: 'Delete Record',
-    message: `Are you sure you want to delete <strong>${props.product.name}</strong>?`,
+    message: `Are you sure you want to delete <strong>${props.code}</strong>?`,
     cancel: true,
     persistent: true,
     html: true

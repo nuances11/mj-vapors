@@ -26,12 +26,9 @@ class Sku extends Model implements Auditable
         'attributes_options' => 'json'
     ];
 
-    protected function price(): Attribute
+    public function getPriceAttribute($value)
     {
-        return Attribute::make(
-            get: static fn($value) => $value / 100,
-            set: static fn($value) => $value * 100,
-        );
+        return number_format($value, 2);
     }
 
     public function product(): BelongsTo
