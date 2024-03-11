@@ -20,15 +20,16 @@ class Sku extends Model implements Auditable
         'attributes_options'
     ];
 
-    protected $appends = ['variants'];
+    protected $appends = ['variants', 'formatted_price'];
 
     protected $casts = [
-        'attributes_options' => 'array'
+        'attributes_options' => 'array',
+        'price' => 'decimal:2'
     ];
 
-    public function getPriceAttribute($value)
+    public function getFormattedPriceAttribute()
     {
-        return number_format($value, 2);
+        return number_format($this->price, 2);
     }
 
     public function product(): BelongsTo

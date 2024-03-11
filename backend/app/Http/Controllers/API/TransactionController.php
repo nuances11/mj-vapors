@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\API\BaseController;
 use App\Models\Transaction;
 use App\Models\TransactionSku;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +17,35 @@ class TransactionController extends BaseController
      */
     public function index()
     {
-        //
+        try {
+
+            [
+                'sort' => $sort,
+                'sort_field' => $sortField,
+                'page_limit' => $pageLimit,
+                'search_keyword' => $searchKeyword,
+                'show_all_records' => $showAllRecords,
+                'filters' => $filters
+            ] = paginatedRequest();
+
+            $query = Transaction::with(['transactionSku']);
+//                ->filter($filters)
+//                ->search($searchKeyword);
+
+            if ($showAllRecords) {
+                $attributes = $query->get();
+            } else {
+                $attributes = $query->paginate($pageLimit);
+            }
+
+            return JsonResource::collection($attributes);
+
+
+        } catch(Exception $e) {
+            return response()->json([
+                "message" => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

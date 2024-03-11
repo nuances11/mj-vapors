@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\AttributeOption;
 use App\Models\Product;
 use App\Models\Sku;
+use App\Models\TransactionSku;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -33,18 +34,8 @@ class TestNoel extends Command
         DB::beginTransaction();
 
         try {
-            $product = Product::findOrFail(1);
-            $sku = Sku::findOrFail(1);
-            $defaultStr = (string) $product->id;
-            foreach($sku->attributes_options as $option) {
-                dump($option);
-                $defaultStr += $option['attribute']['id'];
-                $defaultStr += $option['attribute_option']['id'];
-            }
-
-            $code = str_pad(Str::uuid(), 8, '0', STR_PAD_LEFT);
-            dump("MJV-" . Str::uuid());
-            dump(Str::upper(Str::random()));
+            $transactionSku = TransactionSku::with(['transactions'])->get();
+            dump($transactionSku);
 
             DB::commit();
         } catch (\Exception $e) {

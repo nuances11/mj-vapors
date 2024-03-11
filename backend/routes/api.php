@@ -6,9 +6,8 @@ use App\Http\Controllers\API\BranchController;
 use App\Http\Controllers\API\InventoryController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\SkuController;
+use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\UserController;
-use App\Http\Controllers\TransactionController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*

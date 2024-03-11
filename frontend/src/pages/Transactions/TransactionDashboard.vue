@@ -36,7 +36,9 @@
                 option-label="full_name"
                 option-value="id"
                 emit-value
-                v-model="transactionForm.user_id"/>
+                v-model="transactionForm.user_id"
+                :rules="[(v) => !!v || 'Please select something']"
+              />
             </div>
             <div class="col-6">
               <q-select
@@ -53,6 +55,7 @@
                 option-value="id"
                 emit-value
                 v-model="transactionForm.branch_id"
+                :rules="[(v) => !!v || 'Please select something']"
               />
             </div>
           </div>
@@ -172,13 +175,9 @@
         </q-card-section>
       </q-card-section>
 
-<!--      <q-separator />-->
-<!--      <q-card-section class="flex items-center justify-between">-->
-<!--        <div class="text-bold text-h5">TOTAL</div>-->
-<!--        <div class="text-bold text-h5">{{ formatNumber(grandTotal) }}</div>-->
-<!--      </q-card-section>-->
-
     </q-card>
+
+    <TransactionHistory/>
 
     <q-dialog class="alertDialog" persistent v-model="transactionFormDialog">
       <q-card style="width: 900px; max-width: 80vw;">
@@ -210,7 +209,7 @@
                 emit-value
                 class="q-mb-md"
                 lazy-rules
-                :rules="[ val => val && val.length > 0 || 'Please type something']"
+                :rules="[(v) => !!v || 'Please select something']"
               />
 
               <q-input
@@ -263,6 +262,7 @@ import {useQuasar} from "quasar";
 import {useTransactionRequest} from "src/composables/useTransactionRequest";
 import {useBranchRequest} from "src/composables/useBranchRequest";
 import {useUserRequest} from "src/composables/useUserRequest";
+import TransactionHistory from "pages/Transactions/TransactionHistory.vue";
 
 const $q = useQuasar()
 const branchRequest = useBranchRequest()
@@ -455,17 +455,17 @@ const clearData = () => {
 }
 
 const addProductToCart = (item, productAttributes) => {
-
+  console.log(item);
   let index = cartItem.value.findIndex(x => x.code === item.code);
 
   if (index === -1) {
     item.product_name = productAttributes.name
     item.qty = 1;
-    item.sub_total = item.qty * item.price
+    item.sub_total = item.qty * parseFloat(item.price)
     cartItem.value.push(item);
   } else {
     cartItem.value[index].qty += 1
-    item.sub_total = item.qty * item.price
+    item.sub_total = item.qty * parseFloat(item.price)
   }
 
 }
@@ -522,6 +522,7 @@ const getProductOptions = async () => {
   query.for_options = true
 
   const { data } = await productRequest.getProducts(query);
+  console.log('getProductOptions', data)
   skuData.value = data.skus;
   let productData = data
   productOptions.value = data;

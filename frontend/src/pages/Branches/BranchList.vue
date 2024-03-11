@@ -126,7 +126,7 @@
               label="Branch Status *"
               hint="Select Branch Status"
               emit-value
-              :rules="[ val => val && val.length > 0 || 'Please select something']"
+              :rules="[(v) => !!v || 'Please select something']"
             />
 
             <q-input

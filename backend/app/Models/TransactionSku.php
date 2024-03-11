@@ -14,8 +14,13 @@ class TransactionSku extends Model implements Auditable
 
     protected $table = 'transaction_sku';
 
-    public function transaction(): BelongsTo
+    public function transactions(): BelongsTo
     {
-        return $this->belongsTo(Transaction::class);
+        return $this->belongsTo(Transaction::class, 'transaction_id', 'id');
+    }
+
+    public function skus(): BelongsTo
+    {
+        return $this->belongsTo(Sku::class);
     }
 }
