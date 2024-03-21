@@ -152,7 +152,9 @@ import {useInventoryRequest} from "src/composables/useInventoryRequest";
 import {useBranchRequest} from "src/composables/useBranchRequest";
 import {useProductRequest} from "src/composables/useProductRequest";
 import {useCommonHelper} from "src/composables/useCommonHelper";
+import {useListingRequest} from "src/composables/useListingRequest";
 
+const listingRequest = useListingRequest()
 const commonHelper = useCommonHelper()
 const productRequest = useProductRequest()
 const branchRequest = useBranchRequest()
@@ -379,8 +381,9 @@ const getProducts = async (props) => {
   let query = {}
   query.display_all = true
 
-  const { data } = await productRequest.getProducts(query);
-
+  // const { data } = await productRequest.getProducts(query);
+  const { data } = await listingRequest.getListings()
+  console.log(data);
   if (data) skusOptions.value = data
 };
 

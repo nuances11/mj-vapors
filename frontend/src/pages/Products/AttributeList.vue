@@ -53,6 +53,7 @@
       @edit-item="editAttribute"
       no-data-label="I didn't find anything for you"
       no-results-label="The filter didn't uncover any results"
+      wrap-cells
     />
 
     <q-dialog class="alertDialog" persistent v-model="showProductAttributeFormDialog">
@@ -381,6 +382,7 @@ const closeFormDialog = () => {
 }
 
 const createAttribute = () => {
+  isAddMode.value = true;
   if(form.value.options.length === 0)
     addOption();
   showProductAttributeFormDialog.value = true;

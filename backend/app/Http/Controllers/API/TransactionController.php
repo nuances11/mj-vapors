@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Inventory;
 use App\Models\Transaction;
 use App\Models\TransactionSku;
 use Exception;
@@ -28,7 +29,7 @@ class TransactionController extends BaseController
                 'filters' => $filters
             ] = paginatedRequest();
 
-            $query = Transaction::with(['transactionSku']);
+            $query = Transaction::query();
 //                ->filter($filters)
 //                ->search($searchKeyword);
 
@@ -81,6 +82,21 @@ class TransactionController extends BaseController
                     $transactionSku->total_price = $item['sub_total'];
 
                     $transaction->transactionSku()->save($transactionSku);
+
+                    // Update Inventory
+                    $inventory = Inventory::where('branch_id', $transactionForm['branch_id'])
+                        ->where('skus_id', $item['id'])
+                        ->first();
+
+                    $updatedInventory = $inventory->stock_quantity - $item['qty'];
+
+                    if ($updatedInventory > 0) {
+                        $inventory->stock_quantity = (int)$updatedInventory;
+                        $inventory->save();
+                    } else {
+                        DB::rollBack();
+                        return $this->sendError('Item ' . $item['code'] . ' out of stock.', ['error' => 'Item ' . $item['code'] . ' out of stock.'], 403);
+                    }
                 }
             } else {
                 DB::rollBack();
@@ -118,5 +134,63 @@ class TransactionController extends BaseController
     public function destroy(Transaction $transaction)
     {
         //
+    }
+
+    public function getTransactionItems(Request $request, $id)
+    {
+
+        try {
+
+            $transaction = Transaction::findOrFail($id);
+            $data['transaction'] = $transaction;
+            $data['items'] = $transaction->transactionSku;
+
+            return $this->sendResponse($data, 'Transaction items retrieved');
+
+        } catch(Exception $e) {
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
+
+    }
+
+    public function updateTransactionStatus(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $transaction = Transaction::findOrFail($id);
+
+            $transaction->update([
+                'status' => $request->status
+            ]);
+
+            if ($request->status === 'cancelled')
+            {
+                $transaction = Transaction::where('id', $id)->first();
+                if ($transaction->transactionSku) {
+
+                    foreach ($transaction->transactionSku as $sku)
+                    {
+
+                        // Update Inventory
+                        $inventory = Inventory::where('branch_id', $transaction->branch_id)
+                            ->where('skus_id', $sku->sku_id)
+                            ->first();
+
+                        $updatedInventory = $inventory->stock_quantity + $sku->quantity;
+
+                        $inventory->stock_quantity = (int)$updatedInventory;
+                        $inventory->save();
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return $this->sendResponse($transaction, 'Transaction updated.');
+
+        } catch(Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
 }

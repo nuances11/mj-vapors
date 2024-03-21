@@ -14,13 +14,15 @@ class TransactionSku extends Model implements Auditable
 
     protected $table = 'transaction_sku';
 
+    protected $with = ['skus'];
+
     public function transactions(): BelongsTo
     {
-        return $this->belongsTo(Transaction::class, 'transaction_id', 'id');
+        return $this->belongsTo(Transaction::class, 'transaction_id');
     }
 
     public function skus(): BelongsTo
     {
-        return $this->belongsTo(Sku::class);
+        return $this->belongsTo(Sku::class, 'sku_id');
     }
 }

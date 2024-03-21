@@ -19,6 +19,12 @@ export function useTransactionRequest() {
     });
   };
 
+  const getTransactionItems = (id, data) => {
+    return request.get(api + "/" + id + "/items", {
+      params: data,
+    });
+  };
+
   const updateTransaction = (id, data) => {
     return request.patch(api + "/" + id, data);
   };
@@ -27,11 +33,17 @@ export function useTransactionRequest() {
     return request.delete(api + "/" + id);
   };
 
+  const updateTransactionStatus = (id, data) => {
+    return request.patch(api + "/" + id + "/update-status", data);
+  };
+
   return {
     getTransactions,
     getTransaction,
     addTransaction,
     updateTransaction,
     deleteTransaction,
+    getTransactionItems,
+    updateTransactionStatus,
   }
 }

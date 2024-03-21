@@ -8,6 +8,7 @@ use App\Models\AttributeOption;
 use App\Models\Product;
 use App\Models\Sku;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
@@ -97,9 +98,17 @@ class ProductController extends BaseController
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show($id)
     {
-        //
+        try {
+            $product = Product::findOrFail($id);
+
+            return $this->sendResponse($product, 'Product retrieved');
+
+        } catch(Exception $e) {
+
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
 
     /**

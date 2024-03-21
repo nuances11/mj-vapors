@@ -82,6 +82,47 @@
 
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
+          <div v-if="isTransactionHistory">
+            <q-btn
+              class="q-mr-xs"
+              size="sm"
+              color="primary"
+              icon="visibility"
+              :loading="loading"
+              @click="showTransaction(props)"
+            >
+              <q-tooltip>
+                View Transaction
+              </q-tooltip>
+            </q-btn>
+            <q-btn
+              v-if="props.row.status === 'success'"
+              class="q-mr-xs"
+              size="sm"
+              color="warning"
+              icon="production_quantity_limits"
+              :loading="loading"
+              @click="voidTransaction(props)"
+            >
+              <q-tooltip>
+                Void Transaction
+              </q-tooltip>
+            </q-btn>
+            <q-btn
+              v-if="props.row.status === 'voided'"
+              class="q-mr-xs"
+              size="sm"
+              color="negative"
+              icon="delete_forever"
+              :loading="loading"
+              @click="cancelTransaction(props)"
+            >
+              <q-tooltip>
+                Cancel Transaction
+              </q-tooltip>
+            </q-btn>
+          </div>
+          <div v-else>
             <q-btn
               class="q-mr-xs"
               size="sm"
@@ -100,6 +141,7 @@
               :loading="loading"
               @click="deleteItem(props)"
             />
+          </div>
 
         </q-td>
       </template>
@@ -116,7 +158,13 @@ import TableSkeleton from "components/skeleton/TableSkeleton.vue";
 import {capitalize} from "vue";
 import {useCommonHelper} from "src/composables/useCommonHelper";
 
-const emit = defineEmits(['deleteItem', 'editItem'])
+const emit = defineEmits([
+  'deleteItem',
+  'editItem',
+  'showTransaction',
+  'voidTransaction',
+  'cancelTransaction'
+])
 
 const commonHelper = useCommonHelper()
 
@@ -125,8 +173,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isTransactionHistory: {
+    type: Boolean,
+    default: false,
+  },
 });
 
+
+console.log(props.isTransactionHistory)
 
 const copyToClipboard = (string) => {
   commonHelper.copyToClipboard(string)
@@ -137,6 +191,18 @@ const deleteItem = (props) => {
 
 const editItem = (props) => {
   emit('editItem', props.row)
+}
+
+const showTransaction = (props) => {
+  emit('showTransaction', props.row)
+}
+
+const voidTransaction = (props) => {
+  emit('voidTransaction', props.row)
+}
+
+const cancelTransaction = (props) => {
+  emit('cancelTransaction', props.row)
 }
 </script>
 

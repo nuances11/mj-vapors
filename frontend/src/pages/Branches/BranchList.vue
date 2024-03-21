@@ -199,7 +199,9 @@ import {useBranchHelper} from "src/composables/useBranchHelper";
 import {useBranchRequest} from "src/composables/useBranchRequest";
 import {useCommonHelper} from "src/composables/useCommonHelper";
 import {useUserRequest} from "src/composables/useUserRequest";
+import {useValidationHelper} from "src/composables/useValidationHelper";
 
+const validationHelper = useValidationHelper()
 const userRequest = useUserRequest()
 const commonHelper = useCommonHelper()
 const branchRequest = useBranchRequest()
@@ -240,6 +242,10 @@ const branchForm = ref({
   name: '',
   status: null
 })
+
+const passwordLength = (password) => {
+  return validationHelper.passwordLength(password) || "Password must be atleast 6 characters"
+}
 
 const iconFilters = {
   status: { inactive: "close", active: "check_circle" },

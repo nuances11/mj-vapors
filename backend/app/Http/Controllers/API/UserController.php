@@ -61,8 +61,8 @@ class UserController extends BaseController
         try {
             $user = new User();
 
-            $randomPassword = Str::random(8);
-            $password = Hash::make($randomPassword);
+//            $randomPassword = Str::random(8);
+            $password = Hash::make($request->password);
 
             $user = $user->create([
                 "first_name" => $request->first_name,

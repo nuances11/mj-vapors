@@ -3,8 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\AttributeOption;
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\Sku;
+use App\Models\Transaction;
 use App\Models\TransactionSku;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -34,8 +36,16 @@ class TestNoel extends Command
         DB::beginTransaction();
 
         try {
-            $transactionSku = TransactionSku::with(['transactions'])->get();
+            $transactionSku = TransactionSku::where('sku_id', 3)->first();
             dump($transactionSku);
+
+            $inventory = Inventory::where('branch_id', 2)
+                            ->where('skus_id', 3)
+                            ->first();
+
+            dump($inventory);
+
+            return 0;
 
             DB::commit();
         } catch (\Exception $e) {

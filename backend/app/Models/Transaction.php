@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -14,13 +15,39 @@ class Transaction extends Model implements Auditable
 {
     use HasFactory, \OwenIt\Auditing\Auditable, SoftDeletes;
 
-    protected $appends = [
-        'transaction_date'
+    protected $fillable = [
+        'branch_id',
+        'user_id',
+        'transaction_type',
+        'reference_number',
+        'total_amount',
+        'status',
     ];
+
+    protected $appends = [
+        'transaction_date',
+        'total_items'
+    ];
+
+    protected $with = ['branch', 'user'];
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function transactionSku(): HasMany
     {
-        return $this->hasMany(TransactionSku::class, 'transaction_id');
+        return $this->hasMany(TransactionSku::class);
+    }
+
+    public function getTotalItemsAttribute(){
+        return $this->transactionSku->sum('quantity') ?? 0;
     }
 
     public function getTransactionDateAttribute(){

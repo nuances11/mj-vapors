@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use OwenIt\Auditing\Contracts\Auditable;
 
 class Sku extends Model implements Auditable
@@ -41,6 +42,12 @@ class Sku extends Model implements Auditable
     {
         return $this->belongsToMany(AttributeOption::class,
             'attribute_option_sku', 'sku_id', 'attribute_option_id');
+
+    }
+
+    public function inventory(): HasMany
+    {
+        return $this->hasMany(Inventory::class, 'skus_id');
 
     }
 

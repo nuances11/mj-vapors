@@ -32,9 +32,21 @@ class   SkuController extends BaseController
                 'filters' => $filters
             ] = paginatedRequest();
 
-            $query = Sku::with(['product'])
+            $query = Sku::with(['product', 'inventory'])
                 ->filter($filters)
                 ->search($searchKeyword);
+
+            if (request()->has('branch_id')) {
+                $branchId = request()->branch_id;
+                $query->whereHas('inventory', function($q) use ($branchId) {
+                    $q->where('branch_id', $branchId);
+                });
+            }
+
+            if (request()->has('product_id')) {
+                $productId = request()->product_id;
+                $query->where('product_id', $productId);
+            }
 
             if ($showAllRecords) {
                 $attributes = $query->get();

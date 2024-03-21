@@ -31,6 +31,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('users/{id}/check-password', [UserController::class, 'checkPassword']);
     Route::delete('attributes/option/{id}', [AttributeController::class, 'deleteOption']);
     Route::get('attributes/get-options', [AttributeController::class, 'getOptionSelection']);
+    Route::get('transactions/{id}/items', [TransactionController::class, 'getTransactionItems']);
+    Route::patch('transactions/{id}/update-status', [TransactionController::class, 'updateTransactionStatus']);
+
     Route::apiResource('users', UserController::class);
     Route::apiResource('branches', BranchController::class);
     Route::apiResource('attributes', AttributeController::class);
@@ -38,6 +41,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('inventories', InventoryController::class);
     Route::apiResource('listings', SkuController::class);
     Route::apiResource('transactions', TransactionController::class);
+//    Route::apiResource('skus', SkuController::class);
 });
 
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

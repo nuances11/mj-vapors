@@ -55,6 +55,7 @@
                 option-value="id"
                 emit-value
                 v-model="transactionForm.branch_id"
+                @update:model-value="getProductOptions"
                 :rules="[(v) => !!v || 'Please select something']"
               />
             </div>
@@ -89,7 +90,13 @@
           <div>
             <q-list bordered separator v-if="productAttributes">
 
-              <q-item v-for="(attribute, index) in productAttributes.skus" :key="index" clickable v-ripple>
+              <q-item v-for="(attribute, index) in productAttributes" :key="index" clickable v-ripple>
+                <q-item-section avatar>
+                  <q-avatar color="grey-7" text-color="white">
+                    {{ attribute.inventory[0].stock_quantity }}
+                  </q-avatar>
+<!--                  <span class=" text-center text-weight-medium"></span>-->
+                </q-item-section>
                 <q-item-section>
                   <q-item-label>{{ attribute.code }}</q-item-label>
                   <q-item-label caption>{{ getAttributeLabel(attribute.variants) }}</q-item-label>
@@ -115,6 +122,10 @@
               </q-item>
 
             </q-list>
+
+            <div v-else>
+              No listing found.
+            </div>
           </div>
         </q-card-section>
 
@@ -132,33 +143,33 @@
               </tr>
             </thead>
             <tbody v-if="cartItem.length > 0">
-            <tr v-for="(item, index) in cartItem" :key="index">
-              <td class="text-left">{{ item.qty }}</td>
-              <td class="text-center">
+              <tr v-for="(item, index) in cartItem" :key="index">
+                <td class="text-left">{{ item.qty }}</td>
+                <td class="text-center">
 
-                <q-item>
-                  <q-item-section>
-                    <q-item-label>{{ item.product_name }}</q-item-label>
-                    <q-item-label caption class="text-italic">{{ getAttributeLabel(item.variants) }}</q-item-label>
-                  </q-item-section>
-                </q-item>
+                  <q-item>
+                    <q-item-section>
+                      <q-item-label>{{ item.product_name }}</q-item-label>
+                      <q-item-label caption class="text-italic">{{ getAttributeLabel(item.variants) }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-              </td>
-              <td class="text-center">{{ formatNumber(item.price) }}</td>
-              <td class="text-center">{{ formatNumber(item.sub_total) }}</td>
-              <td class="text-center">
-                <q-icon
-                  name="fa-regular fa-pen-to-square"
-                  class="text-green q-mr-sm cursor-pointer"
-                  @click="updateQuantity(1, item)"
-                />
-                <q-icon
-                  name="fa-solid fa-trash-can"
-                  class="text-red cursor-pointer"
-                  @click="deleteCartItem(index)"
-                />
-              </td>
-            </tr>
+                </td>
+                <td class="text-center">{{ formatNumber(item.price) }}</td>
+                <td class="text-center">{{ formatNumber(item.sub_total) }}</td>
+                <td class="text-center">
+                  <q-icon
+                    name="fa-regular fa-pen-to-square"
+                    class="text-green q-mr-sm cursor-pointer"
+                    @click="updateQuantity(1, item)"
+                  />
+                  <q-icon
+                    name="fa-solid fa-trash-can"
+                    class="text-red cursor-pointer"
+                    @click="deleteCartItem(index)"
+                  />
+                </td>
+              </tr>
             </tbody>
           </q-markup-table>
           <div class="totals" v-if="cartItem.length > 0">
@@ -177,7 +188,7 @@
 
     </q-card>
 
-    <TransactionHistory/>
+    <TransactionHistory :key="transactionHistoryKey"/>
 
     <q-dialog class="alertDialog" persistent v-model="transactionFormDialog">
       <q-card style="width: 900px; max-width: 80vw;">
@@ -263,8 +274,10 @@ import {useTransactionRequest} from "src/composables/useTransactionRequest";
 import {useBranchRequest} from "src/composables/useBranchRequest";
 import {useUserRequest} from "src/composables/useUserRequest";
 import TransactionHistory from "pages/Transactions/TransactionHistory.vue";
+import {useListingRequest} from "src/composables/useListingRequest";
 
 const $q = useQuasar()
+const listingRequest = useListingRequest()
 const branchRequest = useBranchRequest()
 const userRequest = useUserRequest()
 const transactionRequest = useTransactionRequest()
@@ -313,13 +326,17 @@ const branchOptions = ref([])
 const loading = ref(false)
 const branchOptionsLoading = ref(false)
 const userOptionsLoading = ref(false)
+const transactionHistoryKey = ref(0)
 
 const submitTransactionForm = async () => {
   await saveTransaction()
+  transactionHistoryKey.value++
 }
 
 const clearTransaction = () => {
   form.value.product = null;
+  transactionForm.value.branch_id = null;
+  transactionForm.value.user_id = null;
   clearData();
   cartItem.value = [];
 }
@@ -492,10 +509,22 @@ const getAttributeLabel = (variant) => {
   return label.toString()
 }
 
-const showAttribute = (value) => {
+const showAttribute = async (value) => {
+  console.log(value);
   if (value) {
-    productAttributes.value = value
+    // productAttributes.value = value
+    let query = {};
+    query.display_all = true;
+    query.branch_id = transactionForm.value.branch_id
+    query.product_id = form.value.product
+    // query.
+
+    let { data } = await listingRequest.getListings(query)
+    productAttributes.value = data
+  } else {
+    productAttributes.value = []
   }
+
 
 }
 
@@ -516,13 +545,15 @@ const itemName = (item) => {
 }
 
 const getProductOptions = async () => {
+  productAttributes.value = []
+  form.value.product = null;
   productOptionsLoading.value = true;
   let query = {}
   query.display_all = true
   query.for_options = true
+  query.branch_id = transactionForm.value.branch_id
 
   const { data } = await productRequest.getProducts(query);
-  console.log('getProductOptions', data)
   skuData.value = data.skus;
   let productData = data
   productOptions.value = data;

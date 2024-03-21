@@ -9,12 +9,6 @@ export function useTransactionHelper() {
         sortable: true,
       },
       {
-        name: "transaction_sku",
-        label: "Product",
-        field: "transaction_sku",
-        align: "left",
-      },
-      {
         name: "transaction_type",
         label: "Transaction Type",
         field: "transaction_type",

@@ -142,6 +142,7 @@ const login = async () => {
       password: form.value.password
     }).then((response) => {
       let data = response.data
+      console.log(data)
       if (data.access_token) {
         if (self.rememberMe) {
           Cookies.set("token", data.access_token, {expires: 365});
@@ -168,6 +169,7 @@ const login = async () => {
       }
     })
   } catch (error) {
+    console.log(error)
     let message = "Error encountered while submitting your data";
     if (typeof error.response.data !== "undefined") {
       if (typeof error.response.data.errors !== "undefined") {
