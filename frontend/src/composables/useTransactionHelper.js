@@ -1,3 +1,5 @@
+import {capitalize} from "vue";
+
 export function useTransactionHelper() {
   const getColumns = () => {
     return [
@@ -9,6 +11,12 @@ export function useTransactionHelper() {
         sortable: true,
       },
       {
+        name: "branch",
+        label: "Branch",
+        field: row => row.branch.name,
+        align: "left",
+      },
+      {
         name: "transaction_type",
         label: "Transaction Type",
         field: "transaction_type",
@@ -18,6 +26,12 @@ export function useTransactionHelper() {
         name: "total_amount",
         label: "Total",
         field: "total_amount",
+        align: "left",
+      },
+      {
+        name: "transaction_status",
+        label: "Status",
+        field: row => capitalize(row.status),
         align: "left",
       },
       {
