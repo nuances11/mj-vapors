@@ -47,6 +47,96 @@
 
         </div>
       </div>
+      <transition name="slide-top" mode="out-in">
+        <div v-if="filter" class="office-users__filters flex gap-sm q-mt-sm">
+          <q-select
+            bg-color="white"
+            v-model="filters.status"
+            dense
+            filled
+            square
+            label="Status"
+            style="min-width: 200px"
+            :options="statusOptions"
+            map-options
+            option-label="label"
+            option-value="value"
+            emit-value
+            clearable
+          />
+
+          <q-select
+            class="q-ml-xs"
+            bg-color="white"
+            v-model="filters.transaction_type"
+            dense
+            filled
+            square
+            label="Transaction Type"
+            style="min-width: 200px"
+            :options="transactionTypeOptions"
+            map-options
+            option-label="label"
+            option-value="value"
+            emit-value
+            clearable
+          />
+
+          <q-select
+            class="q-ml-xs"
+            bg-color="white"
+            v-model="filters.user"
+            dense
+            filled
+            square
+            label="User"
+            style="min-width: 200px"
+            :options="userOptions"
+            map-options
+            option-label="full_name"
+            clearable
+          />
+
+          <q-select
+            class="q-ml-xs"
+            bg-color="white"
+            v-model="filters.branch"
+            dense
+            filled
+            square
+            label="Branch"
+            style="min-width: 200px"
+            :options="branchOptions"
+            map-options
+            option-label="name"
+            clearable
+          />
+        </div>
+        <div v-else-if="hasFilters">
+          <div class="row" v-for="(filter, key, index) in filters" :key="`filter-${index}`">
+            <q-chip
+              v-if="filter"
+              removable
+              color="primary"
+              text-color="white"
+              icon="search"
+              :ripple="false"
+              @remove="removeFilter(filters, key)"
+            >
+              <span v-if="key === 'user'">
+                {{ filter.full_name }}
+              </span>
+              <span v-else-if="key === 'branch'">
+                {{ filter.name }}
+              </span>
+              <span v-else>
+                {{ commonHelper.titleCase(filter) }}
+              </span>
+<!--              {{ commonHelper.titleCase(filter) }}-->
+            </q-chip>
+          </div>
+        </div>
+      </transition>
     </div>
     <DataTable
       class="no-box-shadow no-border-radius"
@@ -226,14 +316,16 @@
 
 import {useTransactionRequest} from "src/composables/useTransactionRequest";
 import {useTransactionHelper} from "src/composables/useTransactionHelper";
-import {capitalize, onMounted, reactive, ref} from "vue";
+import {capitalize, computed, onMounted, reactive, ref, watch} from "vue";
 import {useQuasar} from "quasar";
 import {useCommonHelper} from "src/composables/useCommonHelper";
 import DataTable from "components/Table/DataTable.vue";
 import {useProductRequest} from "src/composables/useProductRequest";
 import {useValidationHelper} from "src/composables/useValidationHelper";
 import {useUserRequest} from "src/composables/useUserRequest";
+import {useBranchRequest} from "src/composables/useBranchRequest";
 
+const branchRequest = useBranchRequest()
 const userRequest = useUserRequest()
 const validationHelper = useValidationHelper()
 const productRequest = useProductRequest()
@@ -250,15 +342,36 @@ const pagination = ref(commonHelper.defaultPagination());
 const loading = ref(false)
 const filters = reactive({
   status: null,
+  transaction_type: null,
+  user: null,
+  branch: null,
 });
 const statusOptions = ref([
   {
-    label: 'Active',
-    value: 'active',
+    label: 'Voided',
+    value: 'voided',
   },
   {
-    label: 'Inactive',
-    value: 'inactive',
+    label: 'Cancelled',
+    value: 'cancelled',
+  },
+]);
+const transactionTypeOptions = ref([
+  {
+    label: 'Cash',
+    value: 'cash',
+  },
+  {
+    label: 'Bank Transfer',
+    value: 'bank_transfer',
+  },
+  {
+    label: 'GCash',
+    value: 'gcash',
+  },
+  {
+    label: 'Maya',
+    value: 'maya',
   },
 ]);
 
@@ -277,6 +390,23 @@ const statusTitle = ref('')
 const statusText = ref('')
 const transactionStatusFormRef = ref(null)
 
+const hasFilters = computed(() => {
+  return (
+    filters.status !== null ||
+    filters.transaction_type !== null ||
+    filters.user !== null ||
+    filters.branch !== null
+  );
+});
+const userOptions = ref([])
+const userOptionsLoading = ref(false)
+const branchOptions = ref([])
+const branchOptionsLoading = ref(false)
+
+const removeFilter = (selected, index) => {
+  delete selected[index]
+};
+
 const getStatusColor = (status) => {
   let color = 'green';
   if (status === 'voided') color = 'warning';
@@ -284,6 +414,31 @@ const getStatusColor = (status) => {
 
   return color;
 
+}
+
+const getBranch = async () => {
+  branchOptionsLoading.value = true;
+  let query = {}
+  query.display_all = true
+  query.for_options = true
+
+  const { data } = await branchRequest.getBranches(query);
+  branchOptions.value = data;
+
+  branchOptionsLoading.value = false;
+}
+
+const getUsers = async () => {
+  userOptionsLoading.value = true;
+  let query = {}
+  query.display_all = true
+  query.for_options = true
+  query.for_transaction = true
+
+  const { data } = await userRequest.getUsers(query);
+  userOptions.value = data;
+
+  userOptionsLoading.value = false;
 }
 
 const proceedUpdate = async () => {
@@ -411,6 +566,22 @@ const getColumns = () => {
   columns.value = transactionHelper.getColumns();
 }
 
+watch(keyword, () => {
+  getTransactions({
+    pagination: pagination.value,
+  });
+});
+
+watch(
+  () => filters,
+  () => {
+    getTransactions({
+      pagination: pagination.value,
+    });
+  },
+  { deep: true }
+);
+
 const getTransactions = async (props) => {
   loading.value = true;
   let query = props.pagination ? props.pagination : pagination.value;
@@ -443,6 +614,8 @@ const getProducts = async () => {
 
 onMounted(() => {
   getColumns();
+  getUsers()
+  getBranch()
   getTransactions({
     pagination: pagination.value,
   });
@@ -451,5 +624,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+
 
 </style>

@@ -29,9 +29,9 @@ class TransactionController extends BaseController
                 'filters' => $filters
             ] = paginatedRequest();
 
-            $query = Transaction::query();
-//                ->filter($filters)
-//                ->search($searchKeyword);
+            $query = Transaction::query()
+                ->filter($filters)
+                ->search($searchKeyword);
 
             if ($showAllRecords) {
                 $attributes = $query->get();

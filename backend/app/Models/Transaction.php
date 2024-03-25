@@ -63,22 +63,61 @@ class Transaction extends Model implements Auditable
         return Str::ucfirst($value);
     }
 
-//    public function scopeSearch($query, $keyword)
-//    {
-//        $query->when($keyword !== '', function ($query) use ($keyword) {
-//            $query->where(function ($query) use ($keyword) {
-//                $query->whereRaw("code LIKE '%$keyword%'");
-//            });
-//            $query->orWhereHas('product', function($q)  use ($keyword) {
-//                $q->whereRaw("name LIKE '%$keyword%'");
-//            });
-//        });
-//    }
-//
-//    public function scopeFilter($query, $filters)
-//    {
-//        foreach ($filters as $filter_name => $filter_value) {
-//            $query->where($filter_name, $filter_value);
-//        }
-//    }
+    public function scopeSearch($query, $keyword)
+    {
+        $query->when($keyword !== '', function ($query) use ($keyword) {
+            $query->where(function ($query) use ($keyword) {
+                $query->whereRaw("id LIKE '%$keyword%'");
+                $query->orWhereRaw("total_amount LIKE '%$keyword%'");
+                $query->orWhereRaw("transaction_type LIKE '%$keyword%'");
+                $query->orWhereRaw("status LIKE '%$keyword%'");
+                $query->orWhereHas('branch', function($q) use ($keyword) {
+                    $q->whereRaw("name LIKE '%$keyword%'");
+                });
+            });
+        });
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when(
+            $filters['status'] ?? false,
+            fn ($query, $status) =>
+            $query->where(
+                fn ($query) =>
+                $query
+                    ->where('status', $status)
+            )
+        );
+
+        $query->when(
+            $filters['transaction_type'] ?? false,
+            fn ($query, $transactionType) =>
+            $query->where(
+                fn ($query) =>
+                $query
+                    ->where('transaction_type', $transactionType)
+            )
+        );
+
+        $query->when(
+            $filters['user'] ?? false,
+            fn ($query, $user) =>
+            $query->where(
+                fn ($query) =>
+                $query
+                    ->where('user_id', $user['id'])
+            )
+        );
+
+        $query->when(
+            $filters['branch'] ?? false,
+            fn ($query, $branchId) =>
+            $query->where(
+                fn ($query) =>
+                $query
+                    ->where('branch_id', $branchId)
+            )
+        );
+    }
 }

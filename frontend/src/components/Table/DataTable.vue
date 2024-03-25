@@ -109,7 +109,7 @@
               </q-tooltip>
             </q-btn>
             <q-btn
-              v-if="props.row.status === 'voided'"
+              v-if="props.row.status === 'voided' && !isVendor"
               class="q-mr-xs"
               size="sm"
               color="negative"
@@ -155,8 +155,9 @@
 <script setup>
 
 import TableSkeleton from "components/skeleton/TableSkeleton.vue";
-import {capitalize} from "vue";
+import {capitalize, computed} from "vue";
 import {useCommonHelper} from "src/composables/useCommonHelper";
+import {useUserStore} from "stores/user-store";
 
 const emit = defineEmits([
   'deleteItem',
@@ -166,7 +167,10 @@ const emit = defineEmits([
   'cancelTransaction'
 ])
 
+const userStore = useUserStore()
+
 const commonHelper = useCommonHelper()
+const isVendor = computed(() => userStore.user.user_type === 'vendor')
 
 const props = defineProps({
   loading: {

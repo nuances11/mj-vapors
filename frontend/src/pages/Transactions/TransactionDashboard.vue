@@ -22,7 +22,7 @@
       <q-card-section horizontal>
         <q-card-section class="col-6">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6" v-if="!isVendor">
               <q-select
                 class="col-6 q-mb-md"
                 bg-color="white"
@@ -40,7 +40,7 @@
                 :rules="[(v) => !!v || 'Please select something']"
               />
             </div>
-            <div class="col-6">
+            <div class="col-6" v-if="!isVendor">
               <q-select
                 class="col-6 q-mb-md"
                 bg-color="white"
@@ -88,7 +88,7 @@
           </q-select>
 
           <div>
-            <q-list bordered separator v-if="productAttributes">
+            <q-list bordered separator v-if="productAttributes.length">
 
               <q-item v-for="(attribute, index) in productAttributes" :key="index" clickable v-ripple>
                 <q-item-section avatar>
@@ -275,7 +275,9 @@ import {useBranchRequest} from "src/composables/useBranchRequest";
 import {useUserRequest} from "src/composables/useUserRequest";
 import TransactionHistory from "pages/Transactions/TransactionHistory.vue";
 import {useListingRequest} from "src/composables/useListingRequest";
+import {useUserStore} from "stores/user-store";
 
+const userStore = useUserStore()
 const $q = useQuasar()
 const listingRequest = useListingRequest()
 const branchRequest = useBranchRequest()
@@ -328,6 +330,9 @@ const branchOptionsLoading = ref(false)
 const userOptionsLoading = ref(false)
 const transactionHistoryKey = ref(0)
 
+const userType = computed(() => userStore.user.user_type)
+const isVendor = computed(() => userStore.user.user_type === 'vendor')
+
 const submitTransactionForm = async () => {
   await saveTransaction()
   transactionHistoryKey.value++
@@ -371,6 +376,12 @@ const saveTransaction = async () => {
   if (!!!result) {
     return;
   }
+
+  if (!transactionForm.value.user_id)
+    transactionForm.value.user_id = userStore.user.id
+
+  if (!transactionForm.value.branch_id)
+    transactionForm.value.branch_id = userStore.user.branch.id
 
   let formData = {
     transaction_form : transactionForm.value,
@@ -515,7 +526,7 @@ const showAttribute = async (value) => {
     // productAttributes.value = value
     let query = {};
     query.display_all = true;
-    query.branch_id = transactionForm.value.branch_id
+    query.branch_id = transactionForm.value.branch_id ?? userStore.user.branch.id
     query.product_id = form.value.product
     // query.
 
