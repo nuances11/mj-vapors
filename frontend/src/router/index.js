@@ -2,6 +2,7 @@ import { route } from 'quasar/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
 import Cookies from "js-cookie";
+import {useUserStore} from "stores/user-store";
 
 /*
  * If not building with SSR mode, you can
@@ -30,14 +31,19 @@ export default route(function (/* { store, ssrContext } */) {
   Router.beforeEach(  (to, from, next) => {
 
     // if (Cookies.get("user_type") === undefined) Cookies.remove("token");
-
+    const userStore = useUserStore()
     const isAuthenticated = typeof Cookies.get("token") === "string";
     const isRequiresAuth = to.meta.requiresAuth || false;
+    // const isAdminOnly = userStore.user.user_type === 'admin' ||
+    //   userStore.user.user_type === 'super_admin';
+    const isAdminOnly = to?.meta?.isAdminOnly || false
 
     if (isRequiresAuth && !isAuthenticated) {
       next({ name: 'LOGIN' });
     } else if (!isRequiresAuth && isAuthenticated) {
       next({ name: 'LOGIN' });
+    } else if (isAdminOnly && userStore?.user?.user_type === 'vendor') {
+      next({ name: 'DASHBOARD' });
     } else {
       next();
     }
@@ -45,12 +51,15 @@ export default route(function (/* { store, ssrContext } */) {
   })
 
   Router.afterEach((to) => {
+
+
     if (to?.meta?.breadCrumb)
       // from
       // Use next tick to handle router history correctly
       // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
       // Vue.nextTick(() => {
       document.title = `${to.meta.breadCrumb} - MJ Vapors`;
+
   });
 
   function isAuthenticated() {

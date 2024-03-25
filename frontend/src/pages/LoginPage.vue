@@ -90,13 +90,17 @@
 <script setup>
 
 import {useQuasar} from "quasar";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {useAuthenticationRequest} from "src/composables/useAuthenticationRequest";
 import {useValidationHelper} from "src/composables/useValidationHelper";
 import Cookies from "js-cookie";
 import {useRoute, useRouter} from "vue-router";
+import {useUserStore} from "stores/user-store";
+import {useBranchRequest} from "src/composables/useBranchRequest";
 
 let $q = useQuasar()
+const branchRequest = useBranchRequest()
+const userStore = useUserStore()
 let authRequest = useAuthenticationRequest()
 let validationHelper = useValidationHelper()
 const router = useRouter()
@@ -106,10 +110,14 @@ const loginFormRef = ref(null)
 const form = ref({
   email: '',
   password: '',
+  user_type: null,
+  branch_id: null,
 })
 const loading = ref(false);
 const pwdType = ref('password')
 const rememberMe = ref(false)
+const branchOptions = ref([])
+const branchOptionsLoading = ref(false)
 
 const isPasswordLength = (password) => {
   return (
@@ -142,7 +150,6 @@ const login = async () => {
       password: form.value.password
     }).then((response) => {
       let data = response.data
-      console.log(data)
       if (data.access_token) {
         if (self.rememberMe) {
           Cookies.set("token", data.access_token, {expires: 365});
@@ -165,6 +172,10 @@ const login = async () => {
           Cookies.set("permissions", data.permissions);
 
         }
+        userStore.setUser(data.user)
+        userStore.setUserRoles(data.roles)
+        userStore.setUserPermissions(data.permissions)
+
         routeRedirectToUserDashboard();
       }
     })
@@ -211,6 +222,8 @@ const routeRedirectToUserDashboard = () => {
     }
   );
 }
+
+
 
 </script>
 

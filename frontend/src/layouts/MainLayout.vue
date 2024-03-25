@@ -20,6 +20,10 @@
           <q-toolbar-title shrink class="text-weight-bold">
             MJ VAPORS
           </q-toolbar-title>
+
+          <q-toolbar-title shrink class="text-weight-bold">
+            {{ currentBranch ? currentBranch.name : '' }}
+          </q-toolbar-title>
         </q-btn>
 
         <q-space />
@@ -94,6 +98,7 @@
             icon="fa-solid fa-bag-shopping"
             label="Products"
             class="text-medium"
+            v-if="isAdmin"
             >
 
               <q-item
@@ -115,6 +120,7 @@
               clickable
               to="/products/attributes"
               class="text-subtitle1 color-white"
+              v-if="isAdmin"
             >
               <q-item-section avatar>
                 <q-icon size="medium" color="grey" name="fa-solid fa-filter-circle-dollar" />
@@ -129,6 +135,7 @@
             clickable
             to="/users"
             class="text-subtitle1 color-white"
+            v-if="isAdmin"
           >
             <q-item-section avatar>
               <q-icon size="medium" name="fa-solid fa-users" />
@@ -142,6 +149,7 @@
             clickable
             to="/branches"
             class="text-subtitle1 color-white"
+            v-if="isAdmin"
           >
             <q-item-section avatar>
               <q-icon size="medium" name="fa-solid fa-store" />
@@ -155,6 +163,7 @@
             clickable
             to="/inventory"
             class="text-subtitle1 color-white"
+            v-if="isAdmin"
           >
             <q-item-section avatar>
               <q-icon size="medium" name="fa-solid fa-warehouse" />
@@ -173,32 +182,113 @@
         <router-view />
       </div>
     </q-page-container>
+
+    <q-dialog class="alertDialog" persistent v-model="branchSelectorDialog">
+      <q-card style="width: 300px;">
+        <q-form
+          ref="branchFormRef"
+          class="q-gutter-md"
+          @submit="submitBranchForm"
+        >
+          <q-card-section style="padding-bottom: 0;">
+            <div>
+
+              <q-select
+                v-model="branchForm.branch"
+                filled
+                outlined
+                square
+                label="Select Branch"
+                :options="branchOptions"
+                :loading="branchOptionsLoading"
+                hint="Select branch to start transactions."
+                map-options
+                option-label="name"
+                class="q-mb-md"
+                :rules="[(v) => !!v || 'Please select something']"
+              />
+
+            </div>
+          </q-card-section>
+
+          <q-card-actions align="right" style="margin-top: 0 !important;">
+            <q-btn flat label="Submit" color="primary" type="submit" />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
 <script>
-import {computed, defineComponent, ref} from 'vue'
+import {computed, defineComponent, onMounted, ref} from 'vue'
 import { fabYoutube } from '@quasar/extras/fontawesome-v6'
 import { useQuasar } from "quasar";
 import Cookies from "js-cookie";
 import {useAuthenticationRequest} from "src/composables/useAuthenticationRequest";
 import {useAuthenticationHelper} from "src/composables/useAuthenticationHelper";
 import {useRoute, useRouter} from "vue-router";
+import {useUserStore} from "stores/user-store";
+import {useBranchRequest} from "src/composables/useBranchRequest";
 
 export default defineComponent({
   name: 'MainLayout',
 
   setup () {
+    const branchSelectorDialog = ref(false)
     const leftDrawerOpen = ref(false)
     const search = ref('')
     const $q = useQuasar()
+    const userStore = useUserStore()
     const authRequest = useAuthenticationRequest()
     const authHelper = useAuthenticationHelper()
     const router = useRouter()
     const route = useRoute()
     const first_name = Cookies.get('user_first_name');
+    const branchOptionsLoading = ref(false)
+    const branchFormRef = ref(null)
+    const branchOptions = ref([])
+    const branchRequest = useBranchRequest()
+    const branchForm = ref({
+      branch: null
+    })
 
     const currentPath = computed(() =>route.path)
+    const currentBranch = computed(() => userStore.user.branch)
+
+    const isAdmin = computed(() => ['admin', 'super_admin'].includes(userStore.user.user_type))
+
+    onMounted(() => {
+      checkBranch()
+    })
+
+    const getBranchOptions = async () => {
+      branchOptionsLoading.value = true;
+      let query = {}
+      query.display_all = true;
+      const { data } = await branchRequest.getBranches(query)
+      branchOptions.value = data
+      branchOptionsLoading.value = false;
+    }
+
+    async function submitBranchForm() {
+      const result = await branchFormRef.value.validate();
+      if (!!!result) {
+        return;
+      }
+      console.log(branchForm.value.branch)
+      userStore.setUserBranch(branchForm.value.branch);
+      console.log(userStore.user)
+      branchSelectorDialog.value = false;
+    }
+
+    async function checkBranch() {
+      if (!userStore.user.branch) {
+        await getBranchOptions()
+        branchSelectorDialog.value = true;
+      }
+
+    }
 
     function toggleLeftDrawer() {
       leftDrawerOpen.value = !leftDrawerOpen.value
@@ -223,7 +313,7 @@ export default defineComponent({
             .then((response) => {
               if (response.success){
                 authHelper.removeAllCookies();
-
+                userStore.resetUser()
                 router.replace(
                   { path: "/login", params: { ...route.params } },
                   () => {
@@ -240,6 +330,8 @@ export default defineComponent({
     return {
       fabYoutube,
       currentPath,
+      currentBranch,
+      isAdmin,
 
       leftDrawerOpen,
       search,
@@ -247,9 +339,17 @@ export default defineComponent({
 
       toggleLeftDrawer,
       logout,
+      submitBranchForm,
+      checkBranch,
+      branchSelectorDialog,
+      branchOptionsLoading,
+      branchOptions,
+      branchFormRef,
+      branchForm,
     }
   }
 })
+
 </script>
 <style lang="sass">
 .text-medium i

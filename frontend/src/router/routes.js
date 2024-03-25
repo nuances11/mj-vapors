@@ -1,3 +1,8 @@
+export const userTypes = {
+  ADMIN: "admin",
+  ALL: "all",
+};
+
 
 const routes = [
   {
@@ -13,27 +18,27 @@ const routes = [
       {
         path: '/products',
         component: () => import('pages/Products/ProductList.vue'),
-        meta: { breadCrumb: "Products" },
+        meta: { breadCrumb: "Products", isAdminOnly: true },
       },
       {
         path: '/products/attributes',
         component: () => import('pages/Products/AttributeList.vue'),
-        meta: { breadCrumb: "Product Attribute List" },
+        meta: { breadCrumb: "Product Attribute List", isAdminOnly: true },
       },
       {
         path: '/users',
         component: () => import('pages/Users/UserList.vue'),
-        meta: { breadCrumb: "Users" },
+        meta: { breadCrumb: "Users", isAdminOnly: true },
       },
       {
         path: '/branches',
         component: () => import('pages/Branches/BranchList.vue'),
-        meta: { breadCrumb: "Branches" },
+        meta: { breadCrumb: "Branches", isAdminOnly: true },
       },
       {
         path: '/inventory',
         component: () => import('pages/Inventory/InventoryList.vue'),
-        meta: { breadCrumb: "Inventory" },
+        meta: { breadCrumb: "Inventory", isAdminOnly: true },
       },
       {
         path: '/transactions',
