@@ -11,20 +11,12 @@
           icon="menu"
         />
 
-        <q-btn flat no-caps no-wrap class="q-ml-xs" v-if="$q.screen.gt.xs">
-          <img
-            alt="Theme logo"
-            src="~assets/logo.jpg"
-            style="width: 50px;"
-          >
-          <q-toolbar-title shrink class="text-weight-bold">
-            MJ VAPORS
-          </q-toolbar-title>
-
-          <q-toolbar-title shrink class="text-weight-bold">
-            {{ currentBranch ? currentBranch.name : '' }}
-          </q-toolbar-title>
-        </q-btn>
+        <CompanyDetails
+          :key="headerComponentKey"
+          :company-logo="companyLogo"
+          :company-name="companyName"
+          :current-branch="currentBranch ? currentBranch.name : ''"
+        />
 
         <q-space />
 
@@ -172,6 +164,20 @@
               <q-item-label>Inventory</q-item-label>
             </q-item-section>
           </q-item>
+          <q-item
+            v-ripple
+            clickable
+            to="/settings"
+            class="text-subtitle1 color-white"
+            v-if="isAdmin"
+          >
+            <q-item-section avatar>
+              <q-icon size="medium" name="settings" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Settings</q-item-label>
+            </q-item-section>
+          </q-item>
 
         </q-list>
       </q-scroll-area>
@@ -221,7 +227,7 @@
 </template>
 
 <script>
-import {computed, defineComponent, onMounted, ref} from 'vue'
+import {computed, defineComponent, inject, onMounted, ref} from 'vue'
 import { fabYoutube } from '@quasar/extras/fontawesome-v6'
 import { useQuasar } from "quasar";
 import Cookies from "js-cookie";
@@ -230,16 +236,25 @@ import {useAuthenticationHelper} from "src/composables/useAuthenticationHelper";
 import {useRoute, useRouter} from "vue-router";
 import {useUserStore} from "stores/user-store";
 import {useBranchRequest} from "src/composables/useBranchRequest";
+import {useSettingRequest} from "src/composables/useSettingRequest";
+import {useCommonHelper} from "src/composables/useCommonHelper";
+import {useSettingStore} from "stores/setting-store";
+import CompanyDetails from "components/header/CompanyDetails.vue";
 
 export default defineComponent({
   name: 'MainLayout',
+  components: {CompanyDetails},
 
   setup () {
+    const bus = inject("bus");
     const branchSelectorDialog = ref(false)
     const leftDrawerOpen = ref(false)
     const search = ref('')
     const $q = useQuasar()
+    const settingStore = useSettingStore()
     const userStore = useUserStore()
+    const commonHelper = useCommonHelper()
+    const settingRequest = useSettingRequest()
     const authRequest = useAuthenticationRequest()
     const authHelper = useAuthenticationHelper()
     const router = useRouter()
@@ -252,15 +267,48 @@ export default defineComponent({
     const branchForm = ref({
       branch: null
     })
+    const companySetting = ref({
+      id: null,
+      company_name: null,
+      logo: null,
+    })
+    const rand = ref(new Date().getTime() / 1000);
+    const endpointRoute = ref(process.env.API_ROUTE)
+    const headerComponentKey = ref(0)
 
     const currentPath = computed(() =>route.path)
     const currentBranch = computed(() => userStore.user.branch)
+    const companyName = computed(() => settingStore.setting.company.company_name)
+    const companyLogo = computed(() => `${endpointRoute.value}/img/${settingStore.setting.company.logo}?r=${rand.value}`)
+
 
     const isAdmin = computed(() => ['admin', 'super_admin'].includes(userStore.user.user_type))
 
     onMounted(() => {
-      checkBranch()
+      bus.on("company-setting-updated", () => {
+        console.log('company-setting-updated')
+        rand.value = new Date().getTime() / 1000
+        headerComponentKey.value++
+      });
+
+      geCompanySettings()
+      if (userStore.user.user_type === 'vendor')
+        checkBranch()
+
     })
+
+    const geCompanySettings = async () => {
+
+      const { data } = await settingRequest.getCompanySetting(1);
+      companySetting.value = data;
+      if (!companySetting.value.logo)
+        companySetting.value.logo = "default-logo.png";
+
+      const ONE_SECOND = 1000;
+      // rand.value = new Date().getTime() / ONE_SECOND;
+      settingStore.setCompanySetting(data)
+
+    }
 
     const getBranchOptions = async () => {
       branchOptionsLoading.value = true;
@@ -283,7 +331,8 @@ export default defineComponent({
     }
 
     async function checkBranch() {
-      if (!userStore.user.branch) {
+      console.log('checkBranch', userStore.user.branch)
+      if (!userStore.user.branch || !userStore.user.branch.length > 0) {
         await getBranchOptions()
         branchSelectorDialog.value = true;
       }
@@ -313,6 +362,7 @@ export default defineComponent({
             .then((response) => {
               if (response.success){
                 authHelper.removeAllCookies();
+                userStore.user.branch = [];
                 userStore.resetUser()
                 router.replace(
                   { path: "/login", params: { ...route.params } },
@@ -341,11 +391,20 @@ export default defineComponent({
       logout,
       submitBranchForm,
       checkBranch,
+      geCompanySettings,
       branchSelectorDialog,
       branchOptionsLoading,
       branchOptions,
       branchFormRef,
       branchForm,
+      companySetting,
+      rand,
+      commonHelper,
+      endpointRoute,
+      companyLogo,
+      companyName,
+      bus,
+      headerComponentKey
     }
   }
 })

@@ -59,7 +59,47 @@
       </div>
 
       <transition name="slide-top" mode="out-in">
+        <div v-if="filter" class="office-users__filters flex gap-sm q-mt-sm">
 
+          <q-select
+            class="q-ml-xs"
+            bg-color="white"
+            v-model="filters.branch"
+            dense
+            filled
+            square
+            label="Branch"
+            style="min-width: 200px"
+            :options="branchOptions"
+            map-options
+            option-label="name"
+            clearable
+          />
+        </div>
+        <div v-else-if="hasFilters">
+          <div class="row" v-for="(filter, key, index) in filters" :key="`filter-${index}`">
+            <q-chip
+              v-if="filter"
+              removable
+              color="primary"
+              text-color="white"
+              icon="search"
+              :ripple="false"
+              @remove="removeFilter(filters, key)"
+            >
+              <span v-if="key === 'user'">
+                {{ filter.full_name }}
+              </span>
+              <span v-else-if="key === 'branch'">
+                {{ filter.name }}
+              </span>
+              <span v-else>
+                {{ commonHelper.titleCase(filter) }}
+              </span>
+              <!--              {{ commonHelper.titleCase(filter) }}-->
+            </q-chip>
+          </div>
+        </div>
       </transition>
 
     </div>
@@ -145,7 +185,7 @@
 <script setup>
 
 import {useQuasar} from "quasar";
-import {capitalize, onMounted, ref} from "vue";
+import {capitalize, computed, onMounted, reactive, ref, watch} from "vue";
 import DataTable from "components/Table/DataTable.vue";
 import {useInventoryHelper} from "src/composables/useInventoryHelper";
 import {useInventoryRequest} from "src/composables/useInventoryRequest";
@@ -187,6 +227,35 @@ const loadingSkus = ref(false)
 const isAddMode = ref(false)
 const branchOptions = ref([])
 const skusOptions = ref([])
+const filters = reactive({
+  branch: null,
+});
+
+const hasFilters = computed(() => {
+  return (
+    filters.branch !== null
+  );
+});
+
+watch(keyword, () => {
+  getInventory({
+    pagination: pagination.value,
+  });
+});
+
+watch(
+  () => filters,
+  () => {
+    getInventory({
+      pagination: pagination.value,
+    });
+  },
+  { deep: true }
+);
+
+const removeFilter = (selected, index) => {
+  delete selected[index]
+};
 
 const submitForm = async () => {
   if (isAddMode.value) await saveInventory()
@@ -347,7 +416,8 @@ const getInventory = async (props) => {
   loading.value = true;
   let query = props.pagination ? props.pagination : pagination.value;
   query.keyword = keyword.value;
-  // query.filters = JSON.stringify(filters);
+  query.filters = JSON.stringify(filters);
+  query.get_active_branch = true;
 
   pagination.value = props.pagination;
 
@@ -367,6 +437,7 @@ const getBranches = async () => {
   loadingBranches.value = true;
   let query = {}
   query.display_all = true
+  query.get_active_branch = true;
 
   const { data } = await branchRequest.getBranches(query);
   if (data) {
@@ -389,7 +460,7 @@ const getProducts = async (props) => {
 
 onMounted(() => {
   getColumns()
-  // getBranches()
+  getBranches()
   getInventory({
     pagination: pagination.value,
   });

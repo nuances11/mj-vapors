@@ -171,7 +171,7 @@
               square
               v-model="statusForm.password"
               label="Your Password *"
-              hint="Enter you password confirm."
+              hint="Enter you password to confirm."
               lazy-rules
               type="password"
               :rules="[ val => val && val.length > 0 || 'Please type something', passwordLength]"

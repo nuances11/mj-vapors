@@ -223,6 +223,10 @@ const routeRedirectToUserDashboard = () => {
   );
 }
 
+onMounted(() => {
+  userStore.resetUser()
+})
+
 
 
 </script>

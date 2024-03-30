@@ -29,7 +29,6 @@ class InventoryController extends BaseController
             $query = Inventory::search($searchKeyword)
                 ->filter($filters);
 
-
             $users = $query->paginate($pageLimit);
 
             if ($showAllRecords) {

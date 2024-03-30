@@ -37,4 +37,9 @@ class Branch extends Model implements Auditable
             $query->where($filter_name, $filter_value);
         }
     }
+
+    public function scopeGetActiveBranch($query)
+    {
+        $query->where('status', 'active');
+    }
 }

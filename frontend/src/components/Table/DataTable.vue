@@ -6,9 +6,17 @@
       v-else
       flat
       v-bind="$attrs"
+      dense
+      class="my-sticky-last-column-table"
     >
       <template v-slot:loading>
         <q-inner-loading showing color="primary" />
+      </template>
+
+      <template v-slot:body-cell-price="props">
+        <q-td :props="props">
+         {{ commonHelper.numberFormat(props.row.price)}}
+        </q-td>
       </template>
 
       <template v-slot:body-cell-sku="props">
@@ -128,7 +136,6 @@
               size="sm"
               color="primary"
               icon="edit"
-              label="Edit"
               :loading="loading"
               @click="editItem(props)"
             />
@@ -137,7 +144,6 @@
               size="sm"
               color="negative"
               icon="delete"
-              label="Delete"
               :loading="loading"
               @click="deleteItem(props)"
             />
@@ -211,5 +217,22 @@ const cancelTransaction = (props) => {
 </script>
 
 <style lang="scss">
+.my-sticky-last-column-table {
+  td {
+    &:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      background-color: white
+    }
+  }
+  th {
+    &:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 1;
+    }
+  }
+}
 
 </style>

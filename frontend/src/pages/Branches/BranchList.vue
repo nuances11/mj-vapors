@@ -78,6 +78,7 @@
         <div v-else-if="hasFilters">
           <div v-for="(filter, key, index) in filters" :key="`filter-${index}`">
             <q-chip
+              v-if="filter"
               removable
               color="primary"
               text-color="white"

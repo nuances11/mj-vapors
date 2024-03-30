@@ -51,8 +51,14 @@ class Inventory extends Model implements Auditable
 
     public function scopeFilter($query, $filters)
     {
-        foreach ($filters as $filter_name => $filter_value) {
-            $query->where($filter_name, $filter_value);
-        }
+        $query->when(
+            $filters['branch'] ?? false,
+            fn ($query, $branchId) =>
+            $query->where(
+                fn ($query) =>
+                $query
+                    ->where('branch_id', $branchId)
+            )
+        );
     }
 }

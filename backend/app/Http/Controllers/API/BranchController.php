@@ -32,6 +32,9 @@ class BranchController extends BaseController
             $query = Branch::search($searchKeyword)
                 ->filter($filters);
 
+            if (request()->get_active_branch) {
+                $query->getActiveBranch();
+            }
 
             $users = $query->paginate($pageLimit);
 

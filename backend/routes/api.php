@@ -5,6 +5,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BranchController;
 use App\Http\Controllers\API\InventoryController;
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\SettingCompanyController;
 use App\Http\Controllers\API\SkuController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\UserController;
@@ -41,6 +42,12 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('inventories', InventoryController::class);
     Route::apiResource('listings', SkuController::class);
     Route::apiResource('transactions', TransactionController::class);
+
+
+    Route::prefix('/setting')->group(function () {
+        Route::put('company/upload-logo/{id}', [SettingCompanyController::class, 'uploadLogo']);
+        Route::apiResource('company', SettingCompanyController::class);
+    });
 //    Route::apiResource('skus', SkuController::class);
 });
 

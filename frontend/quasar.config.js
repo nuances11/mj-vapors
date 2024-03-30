@@ -32,6 +32,7 @@ module.exports = configure(function (/* ctx */) {
     boot: [
       'notify-defaults',
       'axios',
+      'bus'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css

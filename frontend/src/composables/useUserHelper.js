@@ -1,4 +1,7 @@
+import {useCommonHelper} from "src/composables/useCommonHelper";
+
 export function useUserHelper() {
+  const commonHelper = useCommonHelper()
   const getColumns = () => {
     return [
       {
@@ -18,7 +21,7 @@ export function useUserHelper() {
       {
         name: "user_type",
         label: "Type",
-        field: "user_type",
+        field: row => commonHelper.titleCase(row.user_type),
         align: "left",
         sortable: true,
       },

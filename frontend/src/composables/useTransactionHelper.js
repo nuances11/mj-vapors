@@ -1,6 +1,8 @@
 import {capitalize} from "vue";
+import {useCommonHelper} from "src/composables/useCommonHelper";
 
 export function useTransactionHelper() {
+  const commonHelper = useCommonHelper()
   const getColumns = () => {
     return [
       {
@@ -25,7 +27,7 @@ export function useTransactionHelper() {
       {
         name: "total_amount",
         label: "Total",
-        field: "total_amount",
+        field: row => commonHelper.numberFormat(row.total_amount),
         align: "left",
       },
       {

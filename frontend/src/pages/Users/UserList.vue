@@ -71,19 +71,38 @@
             option-label="label"
             option-value="value"
             emit-value
+            clearable
+          />
+
+          <q-select
+            clearable
+            class="q-ml-xs"
+            bg-color="white"
+            v-model="filters.user_type"
+            dense
+            filled
+            square
+            label="User Type"
+            style="min-width: 200px"
+            :options="userTypeOptions"
+            map-options
+            option-label="label"
+            option-value="value"
+            emit-value
           />
         </div>
-        <div v-else-if="hasFilters">
+        <div class="row"  v-else-if="hasFilters">
           <div v-for="(filter, key, index) in filters" :key="`filter-${index}`">
             <q-chip
+              v-if="filter"
               removable
               color="primary"
               text-color="white"
-              :icon="getIcon(key, filter)"
+              icon="search"
               :ripple="false"
               @remove="removeFilter(filters, key)"
             >
-              {{ capitalize(filter) }}
+              {{ commonHelper.titleCase(filter) }}
             </q-chip>
           </div>
         </div>
@@ -322,6 +341,7 @@ const loading = ref(false);
 
 const filters = reactive({
   status: null,
+  user_type: null,
 });
 
 const userForm = ref({
@@ -530,7 +550,8 @@ const editUser = async (props) => {
 
 const hasFilters = computed(() => {
   return (
-    filters.status !== null
+    filters.status !== null,
+    filters.user_type !== null
   );
 });
 

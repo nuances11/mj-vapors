@@ -351,6 +351,7 @@ const getBranch = async () => {
   let query = {}
   query.display_all = true
   query.for_options = true
+  query.get_active_branch = true
 
   const { data } = await branchRequest.getBranches(query);
   branchOptions.value = data;

@@ -1,3 +1,21 @@
+.my-sticky-last-column-table {
+  td {
+    &:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      background-color: white
+    }
+  }
+  th {
+    &:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 1;
+    }
+  }
+}
+
 .view-btn-wrp {
   position: absolute;
   right: -55px;

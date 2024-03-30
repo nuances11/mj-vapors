@@ -12,37 +12,37 @@
           filled
           bg-color="white"
           square
-          placeholder="Search User"
+          placeholder="Search Product"
           :class="{ 'full-width q-mt-sm': $q.screen.lt.sm }"
         >
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
         </q-input>
-        <transition name="rotate-center" mode="out-in">
-          <q-btn
-            v-if="!filter"
-            color="primary"
-            size="md"
-            icon="filter_alt"
-            text-color="white"
-            class="q-ml-md"
-            label="Show Filters"
-            :loading="loading"
-            @click="filter = true"
-          />
-          <q-btn
-            v-else
-            color="negative"
-            size="md"
-            icon="close"
-            text-color="white"
-            class="q-ml-md"
-            label="Close Filters"
-            :loading="loading"
-            @click="filter = false"
-          />
-        </transition>
+<!--        <transition name="rotate-center" mode="out-in">-->
+<!--          <q-btn-->
+<!--            v-if="!filter"-->
+<!--            color="primary"-->
+<!--            size="md"-->
+<!--            icon="filter_alt"-->
+<!--            text-color="white"-->
+<!--            class="q-ml-md"-->
+<!--            label="Show Filters"-->
+<!--            :loading="loading"-->
+<!--            @click="filter = true"-->
+<!--          />-->
+<!--          <q-btn-->
+<!--            v-else-->
+<!--            color="negative"-->
+<!--            size="md"-->
+<!--            icon="close"-->
+<!--            text-color="white"-->
+<!--            class="q-ml-md"-->
+<!--            label="Close Filters"-->
+<!--            :loading="loading"-->
+<!--            @click="filter = false"-->
+<!--          />-->
+<!--        </transition>-->
         <q-btn
           icon="add"
           label="Add Product"
@@ -97,7 +97,6 @@
     @edit-item="editProduct"
     no-data-label="I didn't find anything for you"
     no-results-label="The filter didn't uncover any results"
-    wrap-cells
   />
 
   <q-dialog class="alertDialog" persistent v-model="productFormDialog">
