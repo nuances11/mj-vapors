@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserCommission;
 use Exception;
 use Faker\Provider\Base;
 use Illuminate\Http\Request;
@@ -31,7 +32,8 @@ class UserController extends BaseController
                 'filters' => $filters
             ] = paginatedRequest();
 
-            $query = User::search($searchKeyword)
+            $query = User::with(['commission'])
+                ->search($searchKeyword)
                 ->filter($filters);
 
             if ($request->for_transaction) {
@@ -74,6 +76,10 @@ class UserController extends BaseController
                 'password' => $password
             ]);
             $user->refresh();
+            $user = User::with(['commission'])->findOrFail($user->id);
+
+            $commission = new UserCommission(['settings' => $request->commission]);
+            $user->commission()->save($commission);
 
             DB::commit();
             return $this->sendResponse($user, 'User created');
@@ -87,9 +93,10 @@ class UserController extends BaseController
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show($id)
     {
-        //
+        $user = User::findOrFail($id);
+        return $this->sendResponse($user, 'User fetched successfully.');
     }
 
     /**
@@ -99,9 +106,16 @@ class UserController extends BaseController
     {
         DB::beginTransaction();
         try {
-            $user = User::findOrFail($id);
-
-            $user = $user->update($request->all());
+            $user = User::with(['commission'])->findOrFail($id);
+            if ($user->commission === null)
+            {
+                $commission = new UserCommission(['settings' => $request->commission]);
+                $user->commission()->save($commission);
+            }
+            else
+            {
+                $user->commission->update(['settings' => $request->commission]);
+            }
 
             DB::commit();
             return $this->sendResponse($user, 'User updated successfully.');

@@ -33,12 +33,19 @@ export function useUserRequest() {
     });
   };
 
+  const generateUserReport = (id, data) => {
+    return request.get(api + "/report/" + id, {
+      params: data,
+    });
+  }
+
   return {
     getUsers,
     getUser,
     addUser,
     updateUser,
     deleteUser,
-    checkUserPassword
+    checkUserPassword,
+    generateUserReport
   }
 }

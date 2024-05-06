@@ -119,5 +119,18 @@ class Transaction extends Model implements Auditable
                     ->where('branch_id', $branchId)
             )
         );
+
+        foreach ($filters as $filter_name => $filter_value) {
+            if ($filter_name === 'transaction_date') {
+                if (isset($filter_value['from']) && isset($filter_value['to'])) {
+                    $from = $filter_value['from'] . ' 00:00:00';
+                    $to = $filter_value['to'] . ' 23:59:59';
+
+                    $query->whereBetween("created_at", [$from, $to]);
+                } else {
+                    $query->where('created_at', '>=', $filter_value);
+                }
+            }
+        }
     }
 }

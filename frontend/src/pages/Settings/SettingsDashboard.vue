@@ -31,9 +31,8 @@
           </q-tab-panel>
 
           <q-tab-panel name="users">
-            <div class="text-h4 q-mb-md">Alarms</div>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis praesentium cumque magnam odio iure quidem, quod illum numquam possimus obcaecati commodi minima assumenda consectetur culpa fuga nulla ullam. In, libero.</p>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quis praesentium cumque magnam odio iure quidem, quod illum numquam possimus obcaecati commodi minima assumenda consectetur culpa fuga nulla ullam. In, libero.</p>
+            <div class="text-h4 q-mb-md">User Settings</div>
+            <UserSettings/>
           </q-tab-panel>
         </q-tab-panels>
       </template>
@@ -46,6 +45,7 @@
 
 import {ref} from "vue";
 import CompanySettings from "components/settings/CompanySettings.vue";
+import UserSettings from "components/settings/UserSettings.vue";
 
 const tab = ref('company')
 const splitterModel = ref(20)

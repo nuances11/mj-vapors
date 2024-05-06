@@ -91,6 +91,7 @@
             label="Products"
             class="text-medium"
             v-if="isAdmin"
+            style="font-size: 1rem; font-weight: 400;"
             >
 
               <q-item
@@ -164,6 +165,47 @@
               <q-item-label>Inventory</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-expansion-item
+            :content-inset-level="0.5"
+            expand-separator
+            icon="summarize"
+            label="Reports"
+            class="text-medium"
+            v-if="isAdmin"
+            style="font-size: 1rem; font-weight: 400;"
+          >
+
+            <q-item
+              v-ripple
+              clickable
+              to="/reports/transactions"
+              class="text-subtitle1 color-white"
+            >
+              <q-item-section avatar>
+                <q-icon size="medium" color="grey" name="receipt_long" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Transactions</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-ripple
+              clickable
+              to="/reports/users"
+              class="text-subtitle1 color-white"
+              v-if="isAdmin"
+            >
+              <q-item-section avatar>
+                <q-icon size="medium" color="grey" name="account_box" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Users</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-expansion-item>
+
           <q-item
             v-ripple
             clickable

@@ -3,6 +3,18 @@ import {useCommonHelper} from "src/composables/useCommonHelper";
 
 export function useTransactionHelper() {
   const commonHelper = useCommonHelper()
+
+  const getVisibleColumns = () => {
+    return [
+      'id',
+      'user',
+      'branch',
+      'transaction_type',
+      'total_amount',
+      'transaction_status',
+      'transaction_date'
+    ]
+  }
   const getColumns = () => {
     return [
       {
@@ -11,6 +23,12 @@ export function useTransactionHelper() {
         field: "id",
         align: "left",
         sortable: true,
+      },
+      {
+        name: "user",
+        label: "User",
+        field: row => row.user.full_name,
+        align: "left",
       },
       {
         name: "branch",
@@ -54,5 +72,6 @@ export function useTransactionHelper() {
 
   return {
     getColumns,
+    getVisibleColumns
   };
 }

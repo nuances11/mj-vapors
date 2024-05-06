@@ -187,6 +187,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isTransactionReport: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 

@@ -50,6 +50,16 @@ const routes = [
         component: () => import('pages/Settings/SettingsDashboard.vue'),
         meta: { breadCrumb: "Settings", isAdminOnly: true },
       },
+      {
+        path: '/reports/transactions',
+        component: () => import('pages/Reports/TransactionReport.vue'),
+        meta: { breadCrumb: "Transaction Report", isAdminOnly: true },
+      },
+      {
+        path: '/reports/users',
+        component: () => import('pages/Reports/UsersReport.vue'),
+        meta: { breadCrumb: "Users Report", isAdminOnly: true },
+      },
     ],
     meta: {
       requiresAuth: true,

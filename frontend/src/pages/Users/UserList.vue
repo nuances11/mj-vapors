@@ -233,6 +233,79 @@
               </template>
             </q-input>
 
+            <q-separator></q-separator>
+
+            <q-card-section v-if="userForm.user_type === 'vendor'">
+              <div class="text-h6">Commission Setting</div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none" v-if="userForm.user_type === 'vendor'">
+              <q-input
+                step="any"
+                type="number"
+                filled
+                label="Base Salary *"
+                class="text-right"
+                v-model="userForm.commission.base_salary"
+                lazy-rules
+                dense
+                mask="#.##"
+                fill-mask="#"
+                reverse-fill-mask
+                required
+                :rules="[(val) => (val && val > 0) || 'Value should be more than 0']"
+              />
+
+              <q-input
+                step="any"
+                type="number"
+                filled
+                label="Commission Threshold *"
+                class="text-right"
+                v-model="userForm.commission.commission_threshold"
+                lazy-rules
+                dense
+                mask="#.##"
+                fill-mask="#"
+                reverse-fill-mask
+                required
+                :rules="[(val) => (val && val > 0) || 'Value should be more than 0']"
+              />
+
+              <q-input
+                step="any"
+                type="number"
+                filled
+                label="Commission Rate *"
+                class="text-right"
+                v-model="userForm.commission.commission_rate"
+                lazy-rules
+                dense
+                mask="#.##"
+                fill-mask="#"
+                reverse-fill-mask
+                required
+                :rules="[(val) => (val && val > 0) || 'Value should be more than 0']"
+              />
+
+              <q-input
+                step="any"
+                type="number"
+                filled
+                label="Additional Salary *"
+                class="text-right"
+                v-model="userForm.commission.additional_salary"
+                lazy-rules
+                dense
+                mask="#.##"
+                fill-mask="#"
+                reverse-fill-mask
+                required
+                :rules="[(val) => (val && val > 0) || 'Value should be more than 0']"
+              />
+            </q-card-section>
+
+
           </q-card-section>
 
           <q-card-actions align="right">
@@ -282,7 +355,7 @@
 </template>
 
 <script setup>
-import {capitalize, computed, onMounted, reactive, ref, watch} from "vue";
+import {computed, onMounted, reactive, ref, watch} from "vue";
 import {useQuasar} from "quasar";
 import DataTable from "components/Table/DataTable.vue";
 import {useUserHelper} from "src/composables/useUserHelper";
@@ -290,7 +363,9 @@ import {useUserRequest} from "src/composables/useUserRequest";
 import {useCommonHelper} from "src/composables/useCommonHelper";
 import {useValidationHelper} from "src/composables/useValidationHelper";
 import Cookies from "js-cookie";
+import {useUserSettingRequest} from "src/composables/useUserSettingRequest";
 
+const userSetting = useUserSettingRequest()
 const validationHelper = useValidationHelper()
 const commonHelper = useCommonHelper()
 const userHelper = useUserHelper()
@@ -352,7 +427,14 @@ const userForm = ref({
   email: null,
   user_name: null,
   password: '',
-  status: null
+  status: null,
+  commission: {
+    id: null,
+    base_salary: 0,
+    commission_threshold: 0,
+    commission_rate: 0,
+    additional_salary: 0
+  }
 })
 
 const deleteForm = ref({
@@ -469,7 +551,14 @@ const resetForm = () => {
     email: null,
     user_name: null,
     password: '',
-    status: null
+    status: null,
+    commission: {
+      id: null,
+      base_salary: 0,
+      commission_threshold: 0,
+      commission_rate: 0,
+      additional_salary: 0
+    }
   }
 }
 
@@ -484,9 +573,15 @@ const closeFormDialog = () => {
   userFormDialog.value = false;
 }
 
-const addUser = () => {
+const addUser = async () => {
+  userForm.value.commission = await getDefaultUserSetting()
   isAddMode.value = true;
   userFormDialog.value = true;
+}
+
+const getDefaultUserSetting = async () => {
+  const { data } = await userSetting.getUserSetting(1);
+  return data;
 }
 
 const proceedDelete = async () => {
@@ -543,7 +638,15 @@ const deleteUser = async (props) => {
 const editUser = async (props) => {
 
   formTitle.value = 'Update User'
-  userForm.value = commonHelper.deepClone(props)
+  // userForm.value = commonHelper.deepClone(props)
+  Object.assign(userForm.value, props)
+  if (!userForm.value.commission)
+    userForm.value.commission = await getDefaultUserSetting()
+  else
+    userForm.value.commission =
+      userForm.value.commission.settings ??
+      await getDefaultUserSetting()
+  console.log(userForm.value)
   isAddMode.value = false;
   userFormDialog.value = true;
 }

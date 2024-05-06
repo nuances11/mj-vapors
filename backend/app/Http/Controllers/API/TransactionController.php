@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exports\TransactionsExport;
 use App\Models\Inventory;
 use App\Models\Transaction;
 use App\Models\TransactionSku;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Excel;
 
 class TransactionController extends BaseController
 {
@@ -192,5 +195,13 @@ class TransactionController extends BaseController
             DB::rollBack();
             return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function exportToCsv(Request $request)
+    {
+        $name = 'Transaction_Report-' . Carbon::now()->timestamp . '.csv';
+        return (new TransactionsExport($request->all()))->download($name, Excel::CSV, ['Content-Type' =>
+            'text/csv']);
+
     }
 }
