@@ -36,6 +36,8 @@ class TransactionController extends BaseController
                 ->filter($filters)
                 ->search($searchKeyword);
 
+            $query->orderBy($sortField, $sort);
+
             if ($showAllRecords) {
                 $attributes = $query->get();
             } else {

@@ -31,7 +31,7 @@ class User extends Authenticatable implements Auditable
         'status'
     ];
 
-    protected $appends = ['full_name'];
+    protected $appends = ['full_name', 'branch_id'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -61,6 +61,11 @@ class User extends Authenticatable implements Auditable
         return $this->hasOne(UserCommission::class);
     }
 
+    public function branch(): HasOne
+    {
+        return $this->hasOne(UserBranch::class);
+    }
+
     protected function getDefaultGuardName(): string { return 'api'; }
 
     public function scopeSearch($query, $keyword)
@@ -84,6 +89,13 @@ class User extends Authenticatable implements Auditable
     {
 
         return $this->first_name . ' ' . $this->last_name;
+
+    }
+
+    public function getBranchIdAttribute()
+    {
+
+        return $this->branch->branch_id ?? null;
 
     }
 

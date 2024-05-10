@@ -70,12 +70,16 @@ class SetupRolePermission extends Command
         $superAdminRole = Role::findByName(Acl::ROLE_SUPER_ADMIN);
         $adminRole = Role::findByName(Acl::ROLE_ADMIN);
         $vendorRole = Role::findByName(Acl::ROLE_VENDOR);
+        $branchAdminRole = Role::findByName(Acl::ROLE_BRANCH_ADMIN);
 
         $superAdminRole->givePermissionTo(Acl::permissions());
         $superAdminRole->givePermissionTo(Acl::menuPermissions());
 
         $adminRole->givePermissionTo(Acl::permissions());
         $adminRole->givePermissionTo(Acl::menuPermissions());
+
+        $branchAdminRole->givePermissionTo(Acl::permissions());
+        $branchAdminRole->givePermissionTo(Acl::menuPermissions());
 
         $vendorRole->givePermissionTo(Acl::PERMISSION_MANAGE_SALES);
     }

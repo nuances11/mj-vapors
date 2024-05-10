@@ -609,6 +609,7 @@ watch(
 );
 
 const getTransactions = async (props) => {
+  console.log(props)
   loading.value = true;
   let query = props.pagination ? props.pagination : pagination.value;
   query.keyword = keyword.value;

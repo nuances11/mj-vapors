@@ -19,8 +19,7 @@
         />
 
         <q-space />
-
-
+        <clock-container/>
         <q-space />
 
         <div class="q-gutter-sm row items-center no-wrap">
@@ -271,7 +270,7 @@
 <script>
 import {computed, defineComponent, inject, onMounted, ref} from 'vue'
 import { fabYoutube } from '@quasar/extras/fontawesome-v6'
-import { useQuasar } from "quasar";
+import {LocalStorage, useQuasar} from "quasar";
 import Cookies from "js-cookie";
 import {useAuthenticationRequest} from "src/composables/useAuthenticationRequest";
 import {useAuthenticationHelper} from "src/composables/useAuthenticationHelper";
@@ -282,10 +281,11 @@ import {useSettingRequest} from "src/composables/useSettingRequest";
 import {useCommonHelper} from "src/composables/useCommonHelper";
 import {useSettingStore} from "stores/setting-store";
 import CompanyDetails from "components/header/CompanyDetails.vue";
+import ClockContainer from "components/time-clock/ClockContainer.vue";
 
 export default defineComponent({
   name: 'MainLayout',
-  components: {CompanyDetails},
+  components: {ClockContainer, CompanyDetails},
 
   setup () {
     const bus = inject("bus");
@@ -334,8 +334,14 @@ export default defineComponent({
       });
 
       geCompanySettings()
-      if (userStore.user.user_type === 'vendor')
+      let user = JSON.parse(LocalStorage.getItem("user"))
+      console.log('onMounted ----', user.branch)
+      console.log('onMounted type ----', typeof user)
+      console.log('onMounted type ----', user.branch.length)
+      console.log('onMounted type ----', user.user_type === 'vendor')
+      if (user.user_type === 'vendor' && !user.branch)
         checkBranch()
+
 
     })
 

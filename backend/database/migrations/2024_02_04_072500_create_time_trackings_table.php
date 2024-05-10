@@ -15,11 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->dateTime('clock_id');
+            $table->time('work_time');
+            $table->date('work_date');
+            $table->dateTime('clock_in');
             $table->dateTime('clock_out');
-            $table->integer('breaktime_in_seconds');
+            $table->dateTime('break_in');
+            $table->dateTime('break_out');
+            $table->integer('break_time_in_seconds');
             $table->integer('total_hours_in_seconds');
-            $table->integer('total_overtime_in_seconds');
+            $table->enum('last_action', ['clock_in', 'break_in', 'break_out', 'clock_out']);
             $table->timestamps();
         });
     }

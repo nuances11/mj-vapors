@@ -90,6 +90,7 @@
             option-value="value"
             emit-value
           />
+
         </div>
         <div class="row"  v-else-if="hasFilters">
           <div v-for="(filter, key, index) in filters" :key="`filter-${index}`">
@@ -144,6 +145,7 @@
               label="Status"
               hint="Input Status"
               emit-value
+              :rules="[(v) => !!v || 'Please select something']"
             />
             <q-select
               v-if="userForm.id !== parseInt(currentUserId)"
@@ -158,7 +160,24 @@
               label="User Type"
               hint="Input User Type"
               emit-value
-              :rules="[ val => val && val.length > 0 || 'Please type something']"
+              :rules="[(v) => !!v || 'Please select something']"
+              @update:model-value="checkUserType"
+            />
+
+            <q-select
+              v-if="userForm.user_type === 'branch_admin'"
+              class="q-mb-md"
+              dense
+              filled
+              v-model="userForm.branch_id"
+              :options="branchOptions"
+              map-options
+              option-label="name"
+              option-value="id"
+              label="Branch"
+              hint="Input Branch"
+              emit-value
+              :rules="[(v) => !!v || 'Please select something']"
             />
 
             <q-input
@@ -364,7 +383,9 @@ import {useCommonHelper} from "src/composables/useCommonHelper";
 import {useValidationHelper} from "src/composables/useValidationHelper";
 import Cookies from "js-cookie";
 import {useUserSettingRequest} from "src/composables/useUserSettingRequest";
+import {useBranchRequest} from "src/composables/useBranchRequest";
 
+const branchRequest = useBranchRequest()
 const userSetting = useUserSettingRequest()
 const validationHelper = useValidationHelper()
 const commonHelper = useCommonHelper()
@@ -401,6 +422,10 @@ const userTypeOptions = ref([
     label: 'Vendor',
     value: 'vendor',
   },
+  {
+    label: 'Branch Admin',
+    value: 'branch_admin',
+  },
 ]);
 const iconFilters = {
   status: { inactive: "close", active: "check_circle" },
@@ -413,6 +438,8 @@ const deleteUserFormRef = ref(null);
 const currentUserId = Cookies.get("user_id");
 const deleteUserDialog = ref(false);
 const loading = ref(false);
+const branchOptions = ref([])
+const branchOptionsLoading = ref(false)
 
 const filters = reactive({
   status: null,
@@ -424,6 +451,7 @@ const userForm = ref({
   first_name: '',
   last_name: '',
   user_type: null,
+  branch_id: null,
   email: null,
   user_name: null,
   password: '',
@@ -442,6 +470,23 @@ const deleteForm = ref({
   full_name: '',
   password: '',
 })
+
+const checkUserType = (value) => {
+  console.log(value);
+  if (value !== 'branch_admin') userForm.value.branch_id = null
+}
+
+const getBranch = async () => {
+  branchOptionsLoading.value = true;
+  let query = {}
+  query.display_all = true
+  query.for_options = true
+
+  const { data } = await branchRequest.getBranches(query);
+  branchOptions.value = data;
+
+  branchOptionsLoading.value = false;
+}
 
 const removeFilter = (selected, index) => {
   delete selected[index]
@@ -574,6 +619,7 @@ const closeFormDialog = () => {
 }
 
 const addUser = async () => {
+  await getBranch()
   userForm.value.commission = await getDefaultUserSetting()
   isAddMode.value = true;
   userFormDialog.value = true;
@@ -636,7 +682,7 @@ const deleteUser = async (props) => {
 }
 
 const editUser = async (props) => {
-
+  await getBranch()
   formTitle.value = 'Update User'
   // userForm.value = commonHelper.deepClone(props)
   Object.assign(userForm.value, props)

@@ -33,8 +33,6 @@ export const useUserStore = defineStore('user', () => {
 
   const resetUser = () => {
     Object.assign(user, defaultUser)
-    console.log('resetUser defaultUser', defaultUser)
-    console.log('resetUser', user)
     LocalStorage.clear()
   }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserBranch;
 use App\Models\UserCommission;
 use Exception;
 use Faker\Provider\Base;
@@ -63,7 +64,6 @@ class UserController extends BaseController
         try {
             $user = new User();
 
-//            $randomPassword = Str::random(8);
             $password = Hash::make($request->password);
 
             $user = $user->create([
@@ -80,6 +80,13 @@ class UserController extends BaseController
 
             $commission = new UserCommission(['settings' => $request->commission]);
             $user->commission()->save($commission);
+
+            if ($request->branch_id)
+            {
+                $branch = new UserBranch(['branch_id' => $request->branch_id]);
+                $user->branch()->save($branch);
+            }
+
 
             DB::commit();
             return $this->sendResponse($user, 'User created');
@@ -107,6 +114,7 @@ class UserController extends BaseController
         DB::beginTransaction();
         try {
             $user = User::with(['commission'])->findOrFail($id);
+            
             if ($user->commission === null)
             {
                 $commission = new UserCommission(['settings' => $request->commission]);
@@ -115,6 +123,13 @@ class UserController extends BaseController
             else
             {
                 $user->commission->update(['settings' => $request->commission]);
+            }
+
+            if ($user->branch === null && $request->branch_id) {
+                $branch = new UserBranch(['branch_id' => $request->branch_id]);
+                $user->branch()->save($branch);
+            } else {
+                $user->branch()->delete();
             }
 
             DB::commit();

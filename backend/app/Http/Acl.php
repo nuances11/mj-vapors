@@ -9,6 +9,7 @@ class Acl
     const ROLE_SUPER_ADMIN = 'superadmin';
     const ROLE_ADMIN = 'admin';
     const ROLE_VENDOR = 'vendor';
+    const ROLE_BRANCH_ADMIN = 'branch_admin';
 
 
     const PERMISSION_MANAGE_USER = 'manage user';

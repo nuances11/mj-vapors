@@ -338,7 +338,14 @@ const keyword = ref('')
 const filter = ref(false);
 const columns = ref([]);
 const rows = ref([]);
-const pagination = ref(commonHelper.defaultPagination());
+// const pagination = ref(commonHelper.defaultPagination());
+const pagination = ref({
+  sortBy: "created_at",
+  descending: true,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 10,
+});
 const loading = ref(false)
 const filters = reactive({
   status: null,

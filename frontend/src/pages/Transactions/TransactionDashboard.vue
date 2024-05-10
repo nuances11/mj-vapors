@@ -55,7 +55,7 @@
                 option-value="id"
                 emit-value
                 v-model="transactionForm.branch_id"
-                @update:model-value="getProductOptions"
+                @update:model-value="onChangeBranch"
                 :rules="[(v) => !!v || 'Please select something']"
               />
             </div>
@@ -155,7 +155,15 @@
                   </q-item>
 
                 </td>
-                <td class="text-center">{{ formatNumber(item.price) }}</td>
+                <td class="text-center">
+                  <q-icon
+                    v-if="isSuperAdmin"
+                    name="fa-regular fa-pen-to-square"
+                    class="text-green q-mr-sm cursor-pointer"
+                    @click="updatePrice(item)"
+                  />
+                  {{ formatNumber(item.price) }}
+                </td>
                 <td class="text-center">{{ formatNumber(item.sub_total) }}</td>
                 <td class="text-center">
                   <q-icon
@@ -269,7 +277,7 @@
 import {computed, onMounted, ref} from "vue";
 import {useProductRequest} from "src/composables/useProductRequest";
 import {useCommonHelper} from "src/composables/useCommonHelper";
-import {useQuasar} from "quasar";
+import {LocalStorage, useQuasar} from "quasar";
 import {useTransactionRequest} from "src/composables/useTransactionRequest";
 import {useBranchRequest} from "src/composables/useBranchRequest";
 import {useUserRequest} from "src/composables/useUserRequest";
@@ -332,6 +340,7 @@ const transactionHistoryKey = ref(0)
 
 const userType = computed(() => userStore.user.user_type)
 const isVendor = computed(() => userStore.user.user_type === 'vendor')
+const isSuperAdmin = computed(() => userStore.user.user_type === 'super_admin')
 
 const submitTransactionForm = async () => {
   await saveTransaction()
@@ -451,6 +460,29 @@ const deleteCartItem = (index) => {
   })
 }
 
+const updatePrice = (item) => {
+  let price = item.price
+  $q.dialog({
+    title: 'Update price',
+    prompt: {
+      model: price,
+      type: 'number',
+
+      // native attributes:
+      min: 1,
+      step: 1
+    },
+    cancel: true,
+    persistent: true
+  }).onOk(data => {
+    console.log('>>>> OK, received', data)
+    item.price = parseFloat(data);
+    item.sub_total = item.qty * item.price
+  }).onCancel(() => {
+    console.log('>>>> Cancel')
+  })
+}
+
 const updateQuantity = (step, item) => {
   let qty = item.qty
   $q.dialog({
@@ -556,6 +588,11 @@ const itemName = (item) => {
   return `${item.code} - ${item.product.name}`
 }
 
+const onChangeBranch = async () => {
+  cartItem.value = [];
+  await getProductOptions();
+}
+
 const getProductOptions = async () => {
   productAttributes.value = []
   form.value.product = null;
@@ -575,7 +612,10 @@ const getProductOptions = async () => {
 };
 
 onMounted(() => {
-  getProductOptions()
+  // getProductOptions()
+  let user = JSON.parse(LocalStorage.getItem("user"))
+  if (user.user_type === 'vendor')
+    getProductOptions()
   getBranch()
   getUsers()
 })
