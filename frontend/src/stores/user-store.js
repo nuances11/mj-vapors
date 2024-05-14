@@ -13,7 +13,7 @@ const defaultUser = {
   status: "",
   roles: [],
   permissions: [],
-  branch: []
+  branch: null
 }
 
 export const useUserStore = defineStore('user', () => {

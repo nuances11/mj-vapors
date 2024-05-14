@@ -19,7 +19,11 @@ class Branch extends Model implements Auditable
      */
     protected $fillable = [
         'name',
-        'status'
+        'status',
+        'time_in',
+        'time_out',
+        'commission_threshold',
+        'commission_rate',
     ];
 
     public function scopeSearch($query, $keyword)

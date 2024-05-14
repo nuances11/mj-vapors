@@ -20,6 +20,10 @@ class BranchSeeder extends Seeder
             Branch::create([
                 'name' => $faker->company,
                 'status' => $status[array_rand($status)],
+                'opening' => '08:00:00',
+                'closing' => '21:00:00',
+                'commission_threshold' => 5000,
+                'commission_rate' => 1,
             ]);
         }
 

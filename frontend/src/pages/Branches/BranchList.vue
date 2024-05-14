@@ -141,6 +141,77 @@
               :rules="[ val => val && val.length > 0 || 'Please type something']"
             />
 
+            <q-input
+              filled
+              v-model="branchForm.time_in"
+              mask="time"
+              :rules="['time']"
+            >
+              <template v-slot:append>
+                <q-icon name="access_time" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-time v-model="branchForm.time_in">
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="Close" color="primary" flat />
+                      </div>
+                    </q-time>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+
+            <q-input
+              filled
+              v-model="branchForm.time_out"
+              mask="time"
+              :rules="['time']"
+            >
+              <template v-slot:append>
+                <q-icon name="access_time" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-time v-model="branchForm.time_out">
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="Close" color="primary" flat />
+                      </div>
+                    </q-time>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+
+            <q-input
+              clearable
+              step="any"
+              filled
+              label="Commission Threshold *"
+              class="q-py-md text-right"
+              v-model="branchForm.commission_threshold"
+              lazy-rules
+              dense
+              mask="#.##"
+              fill-mask="0"
+              reverse-fill-mask
+              required
+              :rules="[(val) => (val && val > 0) || 'Value should be more than 0']"
+            />
+
+            <q-input
+              clearable
+              step="any"
+              filled
+              label="Commission Rate (%)*"
+              class="q-py-md text-right"
+              v-model="branchForm.commission_rate"
+              lazy-rules
+              dense
+              mask="#.##"
+              fill-mask="0"
+              reverse-fill-mask
+              required
+              :rules="[(val) => (val && val > 0) || 'Value should be more than 0']"
+            >
+            </q-input>
+
           </q-card-section>
 
           <q-card-actions align="right">
@@ -240,8 +311,13 @@ const formTitle = ref('Add Branch')
 const branchFormDialog = ref(false);
 const branchFormRef = ref(null);
 const branchForm = ref({
+  id: null,
   name: '',
-  status: null
+  status: null,
+  time_in: '08:00',
+  time_out: '21:00',
+  commission_threshold: 0,
+  commission_rate: 0,
 })
 
 const passwordLength = (password) => {
@@ -332,7 +408,11 @@ const resetForm = () => {
   branchForm.value = {
     id: null,
     name: '',
-    status: null
+    status: null,
+    time_in: '08:00',
+    time_out: '21:00',
+    commission_threshold: 0,
+    commission_rate: 0,
   }
 }
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\SettingCompanyController;
 use App\Http\Controllers\API\SettingUserController;
 use App\Http\Controllers\API\SkuController;
+use App\Http\Controllers\API\TimeTrackingController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\UserReportController;
@@ -40,6 +41,9 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::patch('transactions/{id}/update-status', [TransactionController::class, 'updateTransactionStatus']);
 
+    Route::post('time-trackings/log-time', [TimeTrackingController::class, 'logTime']);
+    Route::get('time-trackings/check-log-data', [TimeTrackingController::class, 'checkLogData']);
+
     Route::apiResource('users', UserController::class);
     Route::apiResource('branches', BranchController::class);
     Route::apiResource('attributes', AttributeController::class);
@@ -47,6 +51,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('inventories', InventoryController::class);
     Route::apiResource('listings', SkuController::class);
     Route::apiResource('transactions', TransactionController::class);
+    Route::apiResource('time-trackings', TimeTrackingController::class);
+
 
 
     Route::prefix('/setting')->group(function () {

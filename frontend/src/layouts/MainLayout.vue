@@ -328,18 +328,19 @@ export default defineComponent({
 
     onMounted(() => {
       bus.on("company-setting-updated", () => {
-        console.log('company-setting-updated')
         rand.value = new Date().getTime() / 1000
         headerComponentKey.value++
       });
 
       geCompanySettings()
       let user = JSON.parse(LocalStorage.getItem("user"))
-      console.log('onMounted ----', user.branch)
-      console.log('onMounted type ----', typeof user)
-      console.log('onMounted type ----', user.branch.length)
-      console.log('onMounted type ----', user.user_type === 'vendor')
-      if (user.user_type === 'vendor' && !user.branch)
+      // console.log('onMounted ----', user.branch)
+      // console.log('onMounted type ----', typeof user.branch)
+      // // console.log('onMounted type ----', Object.keys(user.branch).length)
+      // console.log('onMounted type ----', user.user_type === 'vendor')
+      // console.log('onMounted type ----', (!user.branch))
+      // console.log('onMounted type ----', userStore.user)
+      if (user.user_type === 'vendor' && (user.branch === null || !Object.keys(user.branch).length))
         checkBranch()
 
 
@@ -353,7 +354,6 @@ export default defineComponent({
         companySetting.value.logo = "default-logo.png";
 
       const ONE_SECOND = 1000;
-      // rand.value = new Date().getTime() / ONE_SECOND;
       settingStore.setCompanySetting(data)
 
     }
