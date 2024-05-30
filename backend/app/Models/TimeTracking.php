@@ -17,13 +17,17 @@ class TimeTracking extends Model implements Auditable
         'work_time',
         'work_date',
         'clock_in',
+        'clock_in_remarks',
         'clock_out',
+        'clock_out_remarks',
         'break_in',
         'break_out',
         'break_time_in_seconds',
         'total_hours_in_seconds',
         'last_action',
     ];
+
+    protected $with = ['branch', 'user'];
 
     public function branch(): BelongsTo
     {
@@ -33,6 +37,27 @@ class TimeTracking extends Model implements Auditable
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeSearch($query, $keyword)
+    {
+        $query->when($keyword !== '', function ($query) use ($keyword) {
+            $query->whereHas('branch', function($q) use ($keyword) {
+                $q->whereRaw("name LIKE '%$keyword%'");
+            });
+            $query->orWhereHas('user', function($q) use ($keyword) {
+                $q->whereRaw("first_name LIKE '%$keyword%'");
+                $q->orWhereRaw("last_name LIKE '%$keyword%'");
+            });
+        });
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+
+        foreach ($filters as $filter_name => $filter_value) {
+            $query->where($filter_name, $filter_value);
+        }
     }
 
 }

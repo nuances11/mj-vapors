@@ -13,6 +13,18 @@
         <q-inner-loading showing color="primary" />
       </template>
 
+      <template v-slot:body-cell-clock_in_remarks="props">
+        <q-td :props="props">
+          <span :class="props.row.clock_in_remarks === 'Early' ? 'text-green' : 'text-red'">{{ props.row.clock_in_remarks }}</span>
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-clock_out_remarks="props">
+        <q-td :props="props">
+          <span :class="props.row.clock_out_remarks === 'Early' ? 'text-green' : 'text-red'">{{ props.row.clock_out_remarks }}</span>
+        </q-td>
+      </template>
+
       <template v-slot:body-cell-price="props">
         <q-td :props="props">
          {{ commonHelper.numberFormat(props.row.price)}}
@@ -190,6 +202,10 @@ const props = defineProps({
   isTransactionReport: {
     type: Boolean,
     default: false,
+  },
+  withActions: {
+    type: Boolean,
+    default: true,
   },
 });
 

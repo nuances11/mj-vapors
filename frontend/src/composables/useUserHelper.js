@@ -18,6 +18,13 @@ export function useUserHelper() {
         align: "left",
         sortable: true,
       },
+      // {
+      //   name: "branch",
+      //   label: "Branch",
+      //   field: row => row.branch?.name,
+      //   align: "left",
+      //   sortable: true,
+      // },
       {
         name: "user_type",
         label: "Type",

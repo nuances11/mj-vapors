@@ -19,6 +19,10 @@ export function useUserRequest() {
     });
   };
 
+  const getUserBranch = (id) => {
+    return request.get(api + "/" + id + "/branch");
+  };
+
   const updateUser = (id, data) => {
     return request.patch(api + "/" + id, data);
   };
@@ -46,6 +50,7 @@ export function useUserRequest() {
     updateUser,
     deleteUser,
     checkUserPassword,
-    generateUserReport
+    generateUserReport,
+    getUserBranch
   }
 }

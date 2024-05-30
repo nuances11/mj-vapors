@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Http\Acl;
 use App\Models\User;
+use App\Models\UserBranch;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
@@ -67,5 +68,22 @@ class UserSeeder extends Seeder
         $vendorRole = Role::findByName(Acl::ROLE_VENDOR);
 
         $vendor->syncRoles($vendorRole);
+
+        $branchAdmin = User::create([
+            'first_name' => 'Branch',
+            'last_name' => 'Admin',
+            'user_type' => 'branch_admin',
+            'status' => 'active',
+            'user_name' => 'branch_admin',
+            'email' => 'sirnoel.webdev+branch.admin@gmail.com',
+            'password' => Hash::make('Welcome@'.date('Y')),
+        ]);
+
+        $branch = new UserBranch(['branch_id' => 1]);
+        $branchAdmin->branch()->save($branch);
+
+        $branchAdminRole = Role::findByName(Acl::ROLE_BRANCH_ADMIN);
+
+        $branchAdmin->syncRoles($branchAdminRole);
     }
 }

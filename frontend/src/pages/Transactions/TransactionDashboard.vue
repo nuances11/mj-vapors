@@ -5,6 +5,7 @@
         <span class="text-weight-regular text-h6">Add Transaction</span>
 
         <q-btn
+          :class="$q.screen.lt.md ? 'full-width' : ''"
           v-if="cartItem.length > 0"
           icon="fa-solid fa-money-bill-trend-up"
           label="Submit Transaction"
@@ -19,18 +20,17 @@
     </div>
     <q-card class="my-card" flat bordered>
 
-      <q-card-section horizontal>
+      <q-card-section :horizontal="!$q.screen.lt.md" :style="$q.screen.lt.md ? 'padding: 5px' : ''">
         <q-card-section class="col-6">
           <div class="row">
-            <div class="col-md-6" v-if="!isVendor">
+            <div :class="!$q.screen.lt.md ? 'col-md-6' : 'col-12'" v-if="!isVendor">
               <q-select
-                class="col-6 q-mb-md"
+                class="q-mb-md"
                 bg-color="white"
                 dense
                 filled
                 square
                 label="User"
-                style="min-width: 200px"
                 :options="userOptions"
                 map-options
                 option-label="full_name"
@@ -40,9 +40,10 @@
                 :rules="[(v) => !!v || 'Please select something']"
               />
             </div>
-            <div class="col-6" v-if="!isVendor">
+            <div :class="!$q.screen.lt.md ? 'col-md-6' : 'col-12'"  v-if="!isVendor">
               <q-select
-                class="col-6 q-mb-md"
+                class="q-mb-md"
+                :class="!$q.screen.lt.md ? 'col-6' : ''"
                 bg-color="white"
                 dense
                 filled
@@ -90,18 +91,23 @@
           <div>
             <q-list bordered separator v-if="productAttributes.length">
 
-              <q-item v-for="(attribute, index) in productAttributes" :key="index" clickable v-ripple>
+              <q-item
+                v-for="(attribute, index) in productAttributes"
+                :key="index"
+                :clickable="$q.screen.lt.md"
+                v-ripple
+                @click="addProductToCart(attribute, productAttributes)"
+              >
                 <q-item-section avatar>
                   <q-avatar color="grey-7" text-color="white">
                     {{ attribute.inventory[0].stock_quantity }}
                   </q-avatar>
-<!--                  <span class=" text-center text-weight-medium"></span>-->
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>{{ attribute.code }}</q-item-label>
                   <q-item-label caption>{{ getAttributeLabel(attribute.variants) }}</q-item-label>
                 </q-item-section>
-                <q-item-section side >
+                <q-item-section v-if="!$q.screen.lt.md" side >
 
                   <div class="q-mt-sm" style="width: 100%">
                     <q-btn
@@ -129,7 +135,7 @@
           </div>
         </q-card-section>
 
-        <q-separator vertical />
+        <q-separator :vertical="!$q.screen.lt.md" />
 
         <q-card-section class="col-6">
           <q-markup-table flat dense wrap-cells>
@@ -206,7 +212,9 @@
           @submit="submitTransactionForm"
         >
           <q-card-section class="card-section-header dialog-header">
-            <div class="text-h6">Submit Transaction</div>
+            <div
+              class="text-h6"
+            >Submit Transaction</div>
           </q-card-section>
 
           <q-separator />
@@ -284,6 +292,7 @@ import {useUserRequest} from "src/composables/useUserRequest";
 import TransactionHistory from "pages/Transactions/TransactionHistory.vue";
 import {useListingRequest} from "src/composables/useListingRequest";
 import {useUserStore} from "stores/user-store";
+import {useTimeTrackingRequest} from "src/composables/useTimeTrackingRequest";
 
 const userStore = useUserStore()
 const $q = useQuasar()
@@ -337,12 +346,43 @@ const loading = ref(false)
 const branchOptionsLoading = ref(false)
 const userOptionsLoading = ref(false)
 const transactionHistoryKey = ref(0)
+const userBranch = ref('')
 
 const userType = computed(() => userStore.user.user_type)
 const isVendor = computed(() => userStore.user.user_type === 'vendor')
 const isSuperAdmin = computed(() => userStore.user.user_type === 'super_admin')
+let timeTrackingRequest = useTimeTrackingRequest();
+const userTimeData = ref({})
+
+const checkLogData = async () => {
+  if (userStore.user.user_type !== 'vendor') return;
+  let query = {
+    branch_id: userStore.user.branch.id,
+    user_id: userStore.user.id,
+  }
+
+  const {data} = await timeTrackingRequest.checkLogData(query)
+  userTimeData.value = data;
+  console.log(data);
+}
+
+const getUserBranch = async () => {
+  const { data } = await userRequest.getUserBranch(userStore.user.id)
+  userBranch.value = data.branch
+  branchOptions.value = branchOptions.value.filter((branch) => branch.name === userBranch.value.name)
+
+}
 
 const submitTransactionForm = async () => {
+  if (userTimeData.value.clock_out) {
+    $q.notify({
+      type: "negative",
+      icon: 'report_problem',
+      message: "Unable to submit transaction. Already clocked out.",
+    });
+
+    return
+  }
   await saveTransaction()
   transactionHistoryKey.value++
 }
@@ -402,7 +442,7 @@ const saveTransaction = async () => {
   loading.value = true;
   try {
     await transactionRequest.addTransaction(formData)
-      .then((response) => {
+      .then( async (response) => {
         if (!response.success) {
           $q.notify({
             type: "negative",
@@ -442,6 +482,13 @@ const refreshTransactionForm = () => {
   transactionForm.value.transaction_type = null;
   transactionForm.value.bank = null;
   transactionForm.value.reference_number = null;
+  productOptions.value = []
+  options.value = []
+  productDefaultOptions.value = []
+
+  console.log('refreshTransactionForm productOptions', productOptions.value)
+  console.log('refreshTransactionForm options', options.value)
+  console.log('refreshTransactionForm productDefaultOptions', productDefaultOptions.value)
 }
 
 const addTransaction = () => {
@@ -513,6 +560,7 @@ const formatNumber = (number) => {
 const clearData = () => {
   skuData.value = [];
   productAttributes.value = [];
+
 }
 
 const addProductToCart = (item, productAttributes) => {
@@ -612,12 +660,17 @@ const getProductOptions = async () => {
 };
 
 onMounted(() => {
-  // getProductOptions()
+  getBranch()
+  getUsers()
+  checkLogData()
   let user = JSON.parse(LocalStorage.getItem("user"))
   if (user.user_type === 'vendor')
     getProductOptions()
-  getBranch()
-  getUsers()
+  console.log(user.user_type)
+  if (user.user_type === 'branch_admin')
+    getUserBranch()
+
+
 })
 </script>
 

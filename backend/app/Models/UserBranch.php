@@ -21,4 +21,9 @@ class UserBranch extends Model implements Auditable
     {
         return $this->belongsTo(User::class);
     }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
 }

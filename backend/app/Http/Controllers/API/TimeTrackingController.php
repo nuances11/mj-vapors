@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
 use App\Models\TimeTracking;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Time;
@@ -16,9 +18,39 @@ class TimeTrackingController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        try {
+
+            [
+                'sort' => $sort,
+                'sort_field' => $sortField,
+                'page_limit' => $pageLimit,
+                'search_keyword' => $searchKeyword,
+                'show_all_records' => $showAllRecords,
+                'filters' => $filters
+            ] = paginatedRequest();
+
+            $query = TimeTracking::query()
+                ->filter($filters)
+                ->search($searchKeyword);
+
+            $query->orderBy($sortField, $sort);
+
+            if ($showAllRecords) {
+                $attributes = $query->get();
+            } else {
+                $attributes = $query->paginate($pageLimit);
+            }
+
+            return JsonResource::collection($attributes);
+
+
+        } catch(Exception $e) {
+            return response()->json([
+                "message" => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -71,6 +103,7 @@ class TimeTrackingController extends BaseController
             $currentTime = Carbon::now()->timezone('Asia/Manila');
             $currentDate = Carbon::now()->timezone('Asia/Manila');
             $data = $request->all();
+            $branchData = Branch::findOrFail($data['branch_id']);
             if ($data['action'] === 'clock_in') {
                 $timeData = TimeTracking::where('user_id', $data['user_id'] ?? Auth::user()->id)
                     ->where('branch_id', $data['branch_id'])
@@ -87,6 +120,7 @@ class TimeTrackingController extends BaseController
                 $timeRecord->work_time = $currentTime;
                 $timeRecord->work_date = $currentDate;
                 $timeRecord->clock_in = $currentTime;
+                $timeRecord->clock_in_remarks = $currentTime->addHours(9)->lt($branchData->opening) ? 'Early' : 'Late';
                 $timeRecord->last_action = $data['action'];
                 $timeRecord->save();
 
@@ -99,13 +133,14 @@ class TimeTrackingController extends BaseController
                     ->where('branch_id', $data['branch_id'])
                     ->whereDay('created_at', Carbon::now()->timezone('Asia/Manila')->day)
                     ->first();
-                
+
                 if ($timeData->clock_in === null) {
                     return $this->sendError('Not yet clocked in', ['error' => 'Not yet clocked in'], 500);
                 }
 
                 $timeData->{$data['action']} = $currentTime;
                 $timeData->last_action = $data['action'];
+                $timeData->clock_out_remarks = $currentTime->addHours(13)->lt($branchData->closing) ? 'Early' : '';
 
                 $timeIn = Carbon::parse($timeData->clock_in, 'Asia/Manila');
                 $timeData->total_hours_in_seconds = $currentTime->diffInSeconds($timeIn);
@@ -130,7 +165,7 @@ class TimeTrackingController extends BaseController
                     ->where('branch_id', $data['branch_id'])
                     ->whereDay('created_at', Carbon::now()->timezone('Asia/Manila')->day)
                     ->first();
-                
+
                 if (!$timeData) {
                     return $this->sendError('No clock in entry', ['error' => 'No clock in entry'], 500);
                 }

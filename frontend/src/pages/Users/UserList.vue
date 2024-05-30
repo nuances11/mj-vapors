@@ -28,6 +28,7 @@
               icon="filter_alt"
               text-color="white"
               class="q-ml-md"
+              :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
               label="Show Filters"
               :loading="loading"
               @click="filter = true"
@@ -39,6 +40,7 @@
               icon="close"
               text-color="white"
               class="q-ml-md"
+              :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
               label="Close Filters"
               :loading="loading"
               @click="filter = false"
@@ -50,6 +52,7 @@
             text-color="white"
             color="secondary"
             class="q-ml-md"
+            :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
             :loading="loading"
             @click="addUser"
           />
@@ -58,38 +61,41 @@
       </div>
       <transition name="slide-top" mode="out-in">
         <div v-if="filter" class="office-users__filters flex gap-sm q-mt-sm">
-          <q-select
-            bg-color="white"
-            v-model="filters.status"
-            dense
-            filled
-            square
-            label="Status"
-            style="min-width: 200px"
-            :options="statusOptions"
-            map-options
-            option-label="label"
-            option-value="value"
-            emit-value
-            clearable
-          />
+          <div class="row">
+            <q-select
+              bg-color="white"
+              v-model="filters.status"
+              dense
+              filled
+              square
+              label="Status"
+              style="min-width: 200px"
+              :options="statusOptions"
+              map-options
+              option-label="label"
+              option-value="value"
+              emit-value
+              clearable
+              :class="$q.screen.lt.md ? 'col q-mb-xs' : ''"
+            />
 
-          <q-select
-            clearable
-            class="q-ml-xs"
-            bg-color="white"
-            v-model="filters.user_type"
-            dense
-            filled
-            square
-            label="User Type"
-            style="min-width: 200px"
-            :options="userTypeOptions"
-            map-options
-            option-label="label"
-            option-value="value"
-            emit-value
-          />
+            <q-select
+              clearable
+              bg-color="white"
+              v-model="filters.user_type"
+              dense
+              filled
+              square
+              label="User Type"
+              style="min-width: 200px"
+              :options="userTypeOptions"
+              map-options
+              option-label="label"
+              option-value="value"
+              emit-value
+              :class="$q.screen.lt.md ? 'col q-mb-xs' : 'q-ml-xs'"
+            />
+          </div>
 
         </div>
         <div class="row"  v-else-if="hasFilters">
@@ -684,7 +690,8 @@ const deleteUser = async (props) => {
 const editUser = async (props) => {
   await getBranch()
   formTitle.value = 'Update User'
-  // userForm.value = commonHelper.deepClone(props)
+  userForm.value = commonHelper.deepClone(props)
+  // console.log('editUser', userForm.value)
   Object.assign(userForm.value, props)
   if (!userForm.value.commission)
     userForm.value.commission = await getDefaultUserSetting()

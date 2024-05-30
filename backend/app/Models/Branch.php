@@ -20,8 +20,8 @@ class Branch extends Model implements Auditable
     protected $fillable = [
         'name',
         'status',
-        'time_in',
-        'time_out',
+        'opening',
+        'closing',
         'commission_threshold',
         'commission_rate',
     ];

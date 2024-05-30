@@ -28,6 +28,7 @@
               icon="filter_alt"
               text-color="white"
               class="q-ml-md"
+              :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
               label="Show Filters"
               :loading="loading"
               @click="filter = true"
@@ -39,17 +40,20 @@
               icon="close"
               text-color="white"
               class="q-ml-md"
+              :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
               label="Close Filters"
               :loading="loading"
               @click="filter = false"
             />
           </transition>
           <q-btn
+            v-if="isAdmin"
             icon="add"
             label="Add Inventory"
             text-color="white"
             color="secondary"
             class="q-ml-md"
+            :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
             :loading="loading"
             @click="addInventory"
           />
@@ -61,20 +65,24 @@
       <transition name="slide-top" mode="out-in">
         <div v-if="filter" class="office-users__filters flex gap-sm q-mt-sm">
 
-          <q-select
-            class="q-ml-xs"
-            bg-color="white"
-            v-model="filters.branch"
-            dense
-            filled
-            square
-            label="Branch"
-            style="min-width: 200px"
-            :options="branchOptions"
-            map-options
-            option-label="name"
-            clearable
-          />
+          <div class="row">
+            <q-select
+              class="q-ml-xs"
+              bg-color="white"
+              v-model="filters.branch"
+              dense
+              filled
+              square
+              label="Branch"
+              style="min-width: 200px"
+              :options="branchOptions"
+              map-options
+              option-label="name"
+              clearable
+              :class="$q.screen.lt.md ? 'col q-mb-xs' : ''"
+            />
+          </div>
+
         </div>
         <div v-else-if="hasFilters">
           <div class="row" v-for="(filter, key, index) in filters" :key="`filter-${index}`">
@@ -111,6 +119,7 @@
       v-model:pagination="pagination"
       @delete-item="deleteInventory"
       @edit-item="editInventory"
+      :with-actions="isAdmin"
       no-data-label="I didn't find anything for you"
       no-results-label="The filter didn't uncover any results"
     />
@@ -193,7 +202,9 @@ import {useBranchRequest} from "src/composables/useBranchRequest";
 import {useProductRequest} from "src/composables/useProductRequest";
 import {useCommonHelper} from "src/composables/useCommonHelper";
 import {useListingRequest} from "src/composables/useListingRequest";
+import {useUserStore} from "stores/user-store";
 
+const userStore = useUserStore()
 const listingRequest = useListingRequest()
 const commonHelper = useCommonHelper()
 const productRequest = useProductRequest()
@@ -236,6 +247,8 @@ const hasFilters = computed(() => {
     filters.branch !== null
   );
 });
+
+const isAdmin = computed(() => ['admin', 'super_admin'].includes(userStore.user.user_type))
 
 watch(keyword, () => {
   getInventory({

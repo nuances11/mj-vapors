@@ -114,7 +114,9 @@ class UserController extends BaseController
         DB::beginTransaction();
         try {
             $user = User::with(['commission'])->findOrFail($id);
-            
+
+            $user->update($request->all());
+
             if ($user->commission === null)
             {
                 $commission = new UserCommission(['settings' => $request->commission]);
@@ -125,11 +127,15 @@ class UserController extends BaseController
                 $user->commission->update(['settings' => $request->commission]);
             }
 
-            if ($user->branch === null && $request->branch_id) {
+//            if ($user->branch === null && $request->branch_id) {
+            if ($request->user_type === 'branch_admin' && $request->branch_id) {
                 $branch = new UserBranch(['branch_id' => $request->branch_id]);
                 $user->branch()->save($branch);
             } else {
-                $user->branch()->delete();
+                if ($user->branch !== null) {
+                    $user->branch()->delete();
+                }
+
             }
 
             DB::commit();
@@ -179,5 +185,13 @@ class UserController extends BaseController
 
             return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function getBranch($id)
+    {
+        $userBranch = UserBranch::with(['branch'])
+                            ->where('user_id', $id)
+                            ->first();
+        return $this->sendResponse($userBranch, 'User branch fetched.');
     }
 }

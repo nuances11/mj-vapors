@@ -1,6 +1,11 @@
+import {useUserStore} from "stores/user-store";
+import {computed} from "vue";
+
 export function useInventoryHelper() {
+  const userStore = useUserStore()
+  const isAdmin = computed(() => ['admin', 'super_admin'].includes(userStore.user.user_type))
   const getColumns = () => {
-    return [
+    let columns = [
       {
         name: "product_sku",
         label: "SKU",
@@ -20,15 +25,20 @@ export function useInventoryHelper() {
         label: "Quantity",
         field: "stock_quantity",
         sortable: true,
-      },
-      {
+      }
+    ];
+
+    if (isAdmin.value) {
+      columns.push({
         name: "actions",
         align: "center",
         label: "Actions",
         field: "actions",
         sortable: false,
-      }
-    ];
+      })
+    }
+
+    return columns
   };
 
   return {

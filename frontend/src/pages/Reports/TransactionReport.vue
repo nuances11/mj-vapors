@@ -11,6 +11,7 @@
             icon="download"
             text-color="white"
             class="q-ml-md"
+            :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
             label="Export as CSV"
             :loading="loading"
             @click="exportAsCsv"
@@ -23,6 +24,7 @@
               icon="filter_alt"
               text-color="white"
               class="q-ml-md"
+              :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
               label="Show Filters"
               :loading="loading"
               @click="filter = true"
@@ -34,6 +36,7 @@
               icon="close"
               text-color="white"
               class="q-ml-md"
+              :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
               label="Close Filters"
               :loading="loading"
               @click="filter = false"
@@ -57,14 +60,14 @@
               bg-color="white"
               square
               placeholder="Search"
-              :class="{ 'full-width q-mt-sm': $q.screen.lt.sm }"
+              :class="$q.screen.lt.md ? ' col-12 q-mb-xs' : ''"
             >
               <template v-slot:prepend>
                 <q-icon name="search" />
               </template>
             </q-input>
             <q-select
-              class="q-ml-xs col"
+              class="col"
               bg-color="white"
               v-model="filters.user"
               dense
@@ -76,9 +79,10 @@
               map-options
               option-label="full_name"
               clearable
+              :class="$q.screen.lt.md ? 'q-mb-xs' : 'q-ml-xs'"
             />
             <q-select
-              class="q-ml-xs col"
+              class="col"
               bg-color="white"
               v-model="filters.branch"
               dense
@@ -90,9 +94,13 @@
               map-options
               option-label="name"
               clearable
+              :class="$q.screen.lt.md ? 'q-mb-xs' : 'q-ml-xs'"
             />
           </div>
-          <div class="row q-mt-sm">
+          <div
+            class="row"
+            :class="!$q.screen.lt.md ? 'q-mt-sm' : ''"
+          >
             <q-select
               class="col"
               bg-color="white"
@@ -108,9 +116,10 @@
               option-value="value"
               emit-value
               clearable
+              :class="$q.screen.lt.md ? 'q-mb-xs' : 'q-ml-xs'"
             />
             <q-select
-              class="q-ml-xs col"
+              class="col"
               bg-color="white"
               v-model="filters.status"
               dense
@@ -124,6 +133,7 @@
               option-value="value"
               emit-value
               clearable
+              :class="$q.screen.lt.md ? 'q-mb-xs' : 'q-ml-xs'"
             />
 
             <q-input

@@ -51,12 +51,22 @@
             </div>
           </div>
           <div class="q-pa-md">
-            <q-btn-group spread push>
+            <q-btn-group v-if="!$q.screen.lt.md" spread push>
               <q-btn @click.prevent="logTime('clock_in')" :disable="timeInBtnDisable" color="green" :loading="loading" push glossy label="Time-in" icon="login" />
               <q-btn @click.prevent="logTime('break_in')" :disable="breakInBtnDisable" color="yellow" :loading="loading" push glossy label="Break-in" icon="alarm_on" />
               <q-btn @click.prevent="logTime('break_out')" :disable="breakOutBtnDisable" color="yellow" :loading="loading" push glossy label="Break-out" icon="update" />
               <q-btn @click.prevent="logTime('clock_out')" :disable="timeOutBtnDisable" color="red" :loading="loading" push glossy label="Time-out" icon="logout" />
             </q-btn-group>
+            <div v-else >
+              <q-btn-group spread push>
+                <q-btn class="col" @click.prevent="logTime('clock_in')" :disable="timeInBtnDisable" color="green" :loading="loading" push glossy label="Time-in" icon="login" />
+                <q-btn class="col"  @click.prevent="logTime('break_in')" :disable="breakInBtnDisable" color="yellow" :loading="loading" push glossy label="Break-in" icon="alarm_on" />
+              </q-btn-group>
+              <q-btn-group class="q-mt-xs" spread push>
+                <q-btn class="col"  @click.prevent="logTime('break_out')" :disable="breakOutBtnDisable" color="yellow" :loading="loading" push glossy label="Break-out" icon="update" />
+                <q-btn class="col"  @click.prevent="logTime('clock_out')" :disable="timeOutBtnDisable" color="red" :loading="loading" push glossy label="Time-out" icon="logout" />
+              </q-btn-group>
+            </div>
           </div>
           <q-markup-table class="q-mt-md q-mb-md">
             <thead>
@@ -69,14 +79,20 @@
             </thead>
             <tbody v-if="userTimeData">
               <tr>
-                <td class="text-center">{{ convertToTime(userTimeData.clock_in) }}</td>
+                <td
+                  class="text-center"
+                  :class="userTimeData.clock_in_remarks === 'Late' ? 'text-red' : 'text-green'"
+                >{{ convertToTime(userTimeData.clock_in) }}</td>
                 <td class="text-center">{{ convertToTime(userTimeData.break_in) }}</td>
                 <td class="text-center">{{ convertToTime(userTimeData.break_out) }}</td>
-                <td class="text-center">{{ convertToTime(userTimeData.clock_out) }}</td>
+                <td
+                  class="text-center"
+                  :class="userTimeData.clock_out_remarks === 'Early' ? 'text-red' : 'text-green'"
+                >{{ convertToTime(userTimeData.clock_out) }}</td>
               </tr>
             </tbody>
           </q-markup-table>
-          <div class="q-pa-xs">
+          <div v-if="userTimeData" class="q-pa-xs">
             <div class="row">
               <div class="col">
                 <strong>
@@ -88,7 +104,7 @@
                   color="grey-7"
                   icon="history_toggle_off"
                 >
-                {{  formatTime(userTimeData.break_time_in_seconds) }}
+                {{  userTimeData ? formatTime(userTimeData.break_time_in_seconds) : 'N/A' }}
                 </q-chip>
               </div>
               <div class="col">
@@ -101,7 +117,7 @@
                   color="grey-7"
                   icon="pending_actions"
                 >
-                {{  formatTime(userTimeData.total_hours_in_seconds) }}
+                {{  userTimeData ? formatTime(userTimeData.total_hours_in_seconds) : 'N/A'}}
                 </q-chip>
               </div>
             </div>
@@ -138,6 +154,7 @@ const loading = ref(false)
 const userTimeData = ref({})
 
 const convertToTime = (dateTime) => {
+  if (dateTime === null ) return
   var event = new Date(dateTime);
   return event.toLocaleTimeString()
 }
@@ -172,6 +189,7 @@ const timeOutBtnDisable = computed(() => {
 
 
 const checkLogData = async () => {
+  if (userStore.user.user_type !== 'vendor') return;
   let query = {
     branch_id: userStore.user.branch.id,
     user_id: userStore.user.id,
@@ -239,38 +257,8 @@ const logTime = async (action) => {
   })
 }
 
-const timeIn = () => {
-  loading.value = true
-  // $q.dialog({
-  //   title: 'Delete Record',
-  //   message: `Are you sure you want to delete <strong>${props.code}</strong>?`,
-  //   cancel: true,
-  //   persistent: true,
-  //   html: true
-  // }).onOk(async () => {
-  //   await listingRequest.deleteListing(props.id)
-  //     .then((response) => {
-  //       if (!response.success) {
-  //         $q.notify({
-  //           type: "negative",
-  //           icon: 'report_problem',
-  //           message: response.message,
-  //         });
-  //       } else {
-  //         $q.notify({
-  //           type: "positive",
-  //           icon: 'check_circle',
-  //           message: response.message,
-  //         });
-  //         refreshList()
-  //       }
-  //     });
-  //
-  //   loading.value = false
-  // })
-}
-
 const showTimeInDialog = () => {
+  if (userStore.user.user_type !== 'vendor') return;
   timeInDialog.value = true
 }
 

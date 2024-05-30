@@ -12,6 +12,7 @@
         />
 
         <CompanyDetails
+          v-if="!$q.screen.lt.md"
           :key="headerComponentKey"
           :company-logo="companyLogo"
           :company-name="companyName"
@@ -22,7 +23,7 @@
         <clock-container/>
         <q-space />
 
-        <div class="q-gutter-sm row items-center no-wrap">
+        <div v-if="!$q.screen.lt.md" class="q-gutter-sm row items-center no-wrap">
           <span v-if="first_name" class="text-subtitle1">
             Welcome, <strong>{{ first_name }}</strong>
           </span>
@@ -59,6 +60,20 @@
             />
           </div>
         </div>
+        <div v-else>
+          <q-btn
+            flat
+            rounded
+            padding="sm"
+            icon="settings_power"
+            color="red-5"
+            size="lg"
+            aria-label="Logout"
+            @click="logout"
+          >
+            <q-tooltip> Logout </q-tooltip>
+          </q-btn>
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -69,6 +84,17 @@
       :width="240"
     >
       <q-scroll-area class="fit">
+        <div class="q-ml-none" style="display: block">
+
+          <CompanyDetails
+            v-if="$q.screen.lt.md"
+            :is-mobile="true"
+            :key="headerComponentKey"
+            :company-logo="companyLogo"
+            :company-name="companyName"
+            :current-branch="currentBranch ? currentBranch.name : ''"
+          />
+        </div>
         <q-list padding>
           <q-item
             v-ripple
@@ -155,7 +181,7 @@
             clickable
             to="/inventory"
             class="text-subtitle1 color-white"
-            v-if="isAdmin"
+            v-if="isAdmin || isBranchAdmin"
           >
             <q-item-section avatar>
               <q-icon size="medium" name="fa-solid fa-warehouse" />
@@ -171,7 +197,7 @@
             icon="summarize"
             label="Reports"
             class="text-medium"
-            v-if="isAdmin"
+            v-if="isAdmin || isBranchAdmin"
             style="font-size: 1rem; font-weight: 400;"
           >
 
@@ -203,6 +229,20 @@
                 <q-item-label>Users</q-item-label>
               </q-item-section>
             </q-item>
+
+            <q-item
+              v-ripple
+              clickable
+              to="/reports/time-tracking"
+              class="text-subtitle1 color-white"
+            >
+              <q-item-section avatar>
+                <q-icon size="medium" color="grey" name="schedule" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Time Tracking</q-item-label>
+              </q-item-section>
+            </q-item>
           </q-expansion-item>
 
           <q-item
@@ -225,7 +265,7 @@
     </q-drawer>
 
     <q-page-container>
-      <div class="main_wrap">
+      <div class="main_wrap" :style="$q.screen.lt.md ? 'padding: 10px' : ''">
         <router-view />
       </div>
     </q-page-container>
@@ -282,12 +322,14 @@ import {useCommonHelper} from "src/composables/useCommonHelper";
 import {useSettingStore} from "stores/setting-store";
 import CompanyDetails from "components/header/CompanyDetails.vue";
 import ClockContainer from "components/time-clock/ClockContainer.vue";
+import {useUserRequest} from "src/composables/useUserRequest";
 
 export default defineComponent({
   name: 'MainLayout',
   components: {ClockContainer, CompanyDetails},
 
   setup () {
+    const userRequest = useUserRequest()
     const bus = inject("bus");
     const branchSelectorDialog = ref(false)
     const leftDrawerOpen = ref(false)
@@ -317,14 +359,24 @@ export default defineComponent({
     const rand = ref(new Date().getTime() / 1000);
     const endpointRoute = ref(process.env.API_ROUTE)
     const headerComponentKey = ref(0)
+    const userBranch = ref('')
 
     const currentPath = computed(() =>route.path)
-    const currentBranch = computed(() => userStore.user.branch)
+    const currentBranch = computed( () => {
+      if (userStore.user.user_type === 'vendor') {
+        return userStore.user.branch
+      } else if (userStore.user.user_type === 'branch_admin') {
+        return userBranch.value
+      }
+
+      return ''
+    })
     const companyName = computed(() => settingStore.setting.company.company_name)
     const companyLogo = computed(() => `${endpointRoute.value}/img/${settingStore.setting.company.logo}?r=${rand.value}`)
 
 
     const isAdmin = computed(() => ['admin', 'super_admin'].includes(userStore.user.user_type))
+    const isBranchAdmin = computed(() => userStore.user.user_type === 'branch_admin')
 
     onMounted(() => {
       bus.on("company-setting-updated", () => {
@@ -332,19 +384,21 @@ export default defineComponent({
         headerComponentKey.value++
       });
 
+      getUserBranch()
+
       geCompanySettings()
       let user = JSON.parse(LocalStorage.getItem("user"))
-      // console.log('onMounted ----', user.branch)
-      // console.log('onMounted type ----', typeof user.branch)
-      // // console.log('onMounted type ----', Object.keys(user.branch).length)
-      // console.log('onMounted type ----', user.user_type === 'vendor')
-      // console.log('onMounted type ----', (!user.branch))
-      // console.log('onMounted type ----', userStore.user)
       if (user.user_type === 'vendor' && (user.branch === null || !Object.keys(user.branch).length))
         checkBranch()
 
 
     })
+
+    const getUserBranch = async () => {
+      if (userStore.user.user_type !== 'branch_admin') return
+      const { data } = await userRequest.getUserBranch(userStore.user.id)
+      userBranch.value = data.branch ?? null
+    }
 
     const geCompanySettings = async () => {
 
@@ -430,6 +484,7 @@ export default defineComponent({
       currentPath,
       currentBranch,
       isAdmin,
+      isBranchAdmin,
 
       leftDrawerOpen,
       search,
@@ -439,6 +494,7 @@ export default defineComponent({
       logout,
       submitBranchForm,
       checkBranch,
+      getUserBranch,
       geCompanySettings,
       branchSelectorDialog,
       branchOptionsLoading,
@@ -452,7 +508,8 @@ export default defineComponent({
       companyLogo,
       companyName,
       bus,
-      headerComponentKey
+      headerComponentKey,
+      userBranch
     }
   }
 })

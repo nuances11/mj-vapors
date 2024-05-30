@@ -28,6 +28,7 @@
               icon="filter_alt"
               text-color="white"
               class="q-ml-md"
+              :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
               label="Show Filters"
               :loading="loading"
               @click="filter = true"
@@ -39,6 +40,7 @@
               icon="close"
               text-color="white"
               class="q-ml-md"
+              :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
               label="Close Filters"
               :loading="loading"
               @click="filter = false"
@@ -50,6 +52,7 @@
             text-color="white"
             color="secondary"
             class="q-ml-md"
+            :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
             :loading="loading"
             @click="addBranch"
           />
@@ -60,20 +63,23 @@
 
       <transition name="slide-top" mode="out-in">
         <div v-if="filter" class="office-users__filters flex gap-sm q-mt-sm">
-          <q-select
-            bg-color="white"
-            v-model="filters.status"
-            dense
-            filled
-            square
-            label="Status"
-            style="min-width: 200px"
-            :options="statusOptions"
-            map-options
-            option-label="label"
-            option-value="value"
-            emit-value
-          />
+          <div class="row">
+            <q-select
+              bg-color="white"
+              v-model="filters.status"
+              dense
+              filled
+              square
+              label="Status"
+              style="min-width: 200px"
+              :options="statusOptions"
+              map-options
+              option-label="label"
+              option-value="value"
+              emit-value
+              :class="$q.screen.lt.md ? 'col q-mb-xs' : ''"
+            />
+          </div>
         </div>
         <div v-else-if="hasFilters">
           <div v-for="(filter, key, index) in filters" :key="`filter-${index}`">
@@ -142,15 +148,16 @@
             />
 
             <q-input
+              label="Time In"
               filled
-              v-model="branchForm.time_in"
+              v-model="branchForm.opening"
               mask="time"
-              :rules="['time']"
+              :rules="[ val => val && val.length > 0 || 'Please select time.']"
             >
               <template v-slot:append>
                 <q-icon name="access_time" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                    <q-time v-model="branchForm.time_in">
+                    <q-time v-model="branchForm.opening">
                       <div class="row items-center justify-end">
                         <q-btn v-close-popup label="Close" color="primary" flat />
                       </div>
@@ -161,15 +168,16 @@
             </q-input>
 
             <q-input
+              label="Time Out"
               filled
-              v-model="branchForm.time_out"
+              v-model="branchForm.closing"
               mask="time"
-              :rules="['time']"
+              :rules="[ val => val && val.length > 0 || 'Please select time.']"
             >
               <template v-slot:append>
                 <q-icon name="access_time" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                    <q-time v-model="branchForm.time_out">
+                    <q-time v-model="branchForm.closing">
                       <div class="row items-center justify-end">
                         <q-btn v-close-popup label="Close" color="primary" flat />
                       </div>
@@ -314,8 +322,8 @@ const branchForm = ref({
   id: null,
   name: '',
   status: null,
-  time_in: '08:00',
-  time_out: '21:00',
+  opening: '08:00:00',
+  closing: '21:00:00',
   commission_threshold: 0,
   commission_rate: 0,
 })
@@ -392,9 +400,10 @@ const deleteBranch = async (props) => {
 }
 
 const editBranch = async (props) => {
-
+  console.log('editBranch', props)
   formTitle.value = 'Update Branch'
   branchForm.value = commonHelper.deepClone(props)
+  console.log('editBranch', branchForm.value)
   isAddMode.value = false;
   branchFormDialog.value = true;
 }
@@ -409,8 +418,8 @@ const resetForm = () => {
     id: null,
     name: '',
     status: null,
-    time_in: '08:00',
-    time_out: '21:00',
+    time_in: '08:00:00',
+    time_out: '21:00:00',
     commission_threshold: 0,
     commission_rate: 0,
   }

@@ -21,6 +21,7 @@
         </q-input>
 <!--        <transition name="rotate-center" mode="out-in">-->
 <!--          <q-btn-->
+<!--            :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"-->
 <!--            v-if="!filter"-->
 <!--            color="primary"-->
 <!--            size="md"-->
@@ -33,6 +34,7 @@
 <!--          />-->
 <!--          <q-btn-->
 <!--            v-else-->
+<!--            :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"-->
 <!--            color="negative"-->
 <!--            size="md"-->
 <!--            icon="close"-->
@@ -44,6 +46,7 @@
 <!--          />-->
 <!--        </transition>-->
         <q-btn
+          :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
           icon="add"
           label="Add Product"
           text-color="white"
@@ -56,20 +59,23 @@
     </div>
     <transition name="slide-top" mode="out-in">
       <div v-if="filter" class="office-users__filters flex gap-sm q-mt-sm">
-        <q-select
-          bg-color="white"
-          v-model="filters.status"
-          dense
-          filled
-          square
-          label="Status"
-          style="min-width: 200px"
-          :options="statusOptions"
-          map-options
-          option-label="label"
-          option-value="value"
-          emit-value
-        />
+        <div class="row">
+          <q-select
+            :class="!$q.screen.lt.md ? 'col q-mb-xs' : ''"
+            bg-color="white"
+            v-model="filters.status"
+            dense
+            filled
+            square
+            label="Status"
+            style="min-width: 200px"
+            :options="statusOptions"
+            map-options
+            option-label="label"
+            option-value="value"
+            emit-value
+          />
+        </div>
       </div>
       <div v-else-if="hasFilters">
         <div v-for="(filter, key, index) in filters" :key="`filter-${index}`">

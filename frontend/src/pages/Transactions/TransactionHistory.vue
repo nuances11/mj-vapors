@@ -22,6 +22,7 @@
           </q-input>
           <transition name="rotate-center" mode="out-in">
             <q-btn
+              :class="$q.screen.lt.md ? 'full-width q-mt-sm' : ''"
               v-if="!filter"
               color="primary"
               size="md"
@@ -34,6 +35,7 @@
             />
             <q-btn
               v-else
+              :class="$q.screen.lt.md ? 'full-width q-mt-sm' : ''"
               color="negative"
               size="md"
               icon="close"
@@ -49,68 +51,71 @@
       </div>
       <transition name="slide-top" mode="out-in">
         <div v-if="filter" class="office-users__filters flex gap-sm q-mt-sm">
-          <q-select
-            bg-color="white"
-            v-model="filters.status"
-            dense
-            filled
-            square
-            label="Status"
-            style="min-width: 200px"
-            :options="statusOptions"
-            map-options
-            option-label="label"
-            option-value="value"
-            emit-value
-            clearable
-          />
+          <div class="row">
+            <q-select
+              :class="$q.screen.lt.md ? 'col q-mb-xs' : ''"
+              bg-color="white"
+              v-model="filters.status"
+              dense
+              filled
+              square
+              label="Status"
+              style="min-width: 200px"
+              :options="statusOptions"
+              map-options
+              option-label="label"
+              option-value="value"
+              emit-value
+              clearable
+            />
 
-          <q-select
-            class="q-ml-xs"
-            bg-color="white"
-            v-model="filters.transaction_type"
-            dense
-            filled
-            square
-            label="Transaction Type"
-            style="min-width: 200px"
-            :options="transactionTypeOptions"
-            map-options
-            option-label="label"
-            option-value="value"
-            emit-value
-            clearable
-          />
+            <q-select
+              :class="$q.screen.lt.md ? 'col q-mb-xs' : 'q-ml-xs'"
+              bg-color="white"
+              v-model="filters.transaction_type"
+              dense
+              filled
+              square
+              label="Transaction Type"
+              style="min-width: 200px"
+              :options="transactionTypeOptions"
+              map-options
+              option-label="label"
+              option-value="value"
+              emit-value
+              clearable
+            />
 
-          <q-select
-            class="q-ml-xs"
-            bg-color="white"
-            v-model="filters.user"
-            dense
-            filled
-            square
-            label="User"
-            style="min-width: 200px"
-            :options="userOptions"
-            map-options
-            option-label="full_name"
-            clearable
-          />
+            <q-select
+              :class="$q.screen.lt.md ? 'col q-mb-xs' : 'q-ml-xs'"
+              bg-color="white"
+              v-model="filters.user"
+              dense
+              filled
+              square
+              label="User"
+              style="min-width: 200px"
+              :options="userOptions"
+              map-options
+              option-label="full_name"
+              clearable
+            />
 
-          <q-select
-            class="q-ml-xs"
-            bg-color="white"
-            v-model="filters.branch"
-            dense
-            filled
-            square
-            label="Branch"
-            style="min-width: 200px"
-            :options="branchOptions"
-            map-options
-            option-label="name"
-            clearable
-          />
+            <q-select
+              :class="$q.screen.lt.md ? 'col q-mb-xs' : 'q-ml-xs'"
+              bg-color="white"
+              v-model="filters.branch"
+              dense
+              filled
+              square
+              label="Branch"
+              style="min-width: 200px"
+              :options="branchOptions"
+              map-options
+              option-label="name"
+              clearable
+            />
+          </div>
         </div>
         <div v-else-if="hasFilters">
           <div class="row" v-for="(filter, key, index) in filters" :key="`filter-${index}`">
@@ -197,7 +202,9 @@
           <q-separator />
 
           <q-card-section class="q-mt-xs q-pt-xs">
-            <div class="q-pa-md">
+            <div
+              :class="!$q.screen.lt.md ? 'q-pa-md' : 'q-pa-none'"
+            >
               <div class="row">
                 <div class="col">
                   <strong>
@@ -241,7 +248,7 @@
                 </div>
                 <div class="col" v-if="currentTransaction.reference_number">
                   <strong>
-                    Transaction Type:
+                    Reference #:
                   </strong>
                   {{ capitalize(currentTransaction.reference_number) ?? 'N/A' }}
                 </div>

@@ -53,6 +53,10 @@ class User extends Authenticatable implements Auditable
         'password' => 'hashed',
     ];
 
+    protected $with = [
+        'branch'
+    ];
+
     /**
      * Get the phone associated with the user.
      */
@@ -93,6 +97,13 @@ class User extends Authenticatable implements Auditable
     }
 
     public function getBranchIdAttribute()
+    {
+
+        return $this->branch->branch_id ?? null;
+
+    }
+
+    public function getBranchNameAttribute()
     {
 
         return $this->branch->branch_id ?? null;

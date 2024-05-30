@@ -19,31 +19,34 @@
             <q-icon name="search" />
           </template>
         </q-input>
-        <transition name="rotate-center" mode="out-in">
-          <q-btn
-            v-if="!filter"
-            color="primary"
-            size="md"
-            icon="filter_alt"
-            text-color="white"
-            class="q-ml-md"
-            label="Show Filters"
-            :loading="loading"
-            @click="filter = true"
-          />
-          <q-btn
-            v-else
-            color="negative"
-            size="md"
-            icon="close"
-            text-color="white"
-            class="q-ml-md"
-            label="Close Filters"
-            :loading="loading"
-            @click="filter = false"
-          />
-        </transition>
+<!--        <transition name="rotate-center" mode="out-in">-->
+<!--          <q-btn-->
+<!--            v-if="!filter"-->
+<!--            :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"-->
+<!--            color="primary"-->
+<!--            size="md"-->
+<!--            icon="filter_alt"-->
+<!--            text-color="white"-->
+<!--            class="q-ml-md"-->
+<!--            label="Show Filters"-->
+<!--            :loading="loading"-->
+<!--            @click="filter = true"-->
+<!--          />-->
+<!--          <q-btn-->
+<!--            v-else-->
+<!--            :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"-->
+<!--            color="negative"-->
+<!--            size="md"-->
+<!--            icon="close"-->
+<!--            text-color="white"-->
+<!--            class="q-ml-md"-->
+<!--            label="Close Filters"-->
+<!--            :loading="loading"-->
+<!--            @click="filter = false"-->
+<!--          />-->
+<!--        </transition>-->
         <q-btn
+          :class="$q.screen.lt.md ? 'full-width q-mt-xs' : ''"
           icon="add"
           label="Add Listing"
           text-color="white"

@@ -60,6 +60,11 @@ const routes = [
         component: () => import('pages/Reports/UsersReport.vue'),
         meta: { breadCrumb: "Users Report", isAdminOnly: true },
       },
+      {
+        path: '/reports/time-tracking',
+        component: () => import('pages/Reports/TimeTracking.vue'),
+        meta: { breadCrumb: "Time Tracking", isAdminOnly: true },
+      },
     ],
     meta: {
       requiresAuth: true,
