@@ -400,10 +400,8 @@ const deleteBranch = async (props) => {
 }
 
 const editBranch = async (props) => {
-  console.log('editBranch', props)
   formTitle.value = 'Update Branch'
   branchForm.value = commonHelper.deepClone(props)
-  console.log('editBranch', branchForm.value)
   isAddMode.value = false;
   branchFormDialog.value = true;
 }

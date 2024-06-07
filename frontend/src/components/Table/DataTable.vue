@@ -7,7 +7,7 @@
       flat
       v-bind="$attrs"
       dense
-      class="my-sticky-last-column-table"
+      :class="withActions ? 'my-sticky-last-column-table' : ''"
     >
       <template v-slot:loading>
         <q-inner-loading showing color="primary" />
@@ -101,7 +101,22 @@
       </template>
 
       <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
+        <q-td auto-width :props="props">
+<!--          <div v-if="isUpdatePassword">-->
+<!--            <q-btn-->
+<!--              class="q-mr-xs"-->
+<!--              size="sm"-->
+<!--              color="warning"-->
+<!--              icon="lock"-->
+<!--              :loading="loading"-->
+<!--              :class="$q.screen.lt.md ? 'full-width q-mb-xs' : ''"-->
+<!--              @click="updatePassword(props)"-->
+<!--            >-->
+<!--              <q-tooltip>-->
+<!--                Update Password-->
+<!--              </q-tooltip>-->
+<!--            </q-btn>-->
+<!--          </div>-->
           <div v-if="isTransactionHistory">
             <q-btn
               class="q-mr-xs"
@@ -176,6 +191,7 @@ import TableSkeleton from "components/skeleton/TableSkeleton.vue";
 import {capitalize, computed} from "vue";
 import {useCommonHelper} from "src/composables/useCommonHelper";
 import {useUserStore} from "stores/user-store";
+import {useQuasar} from "quasar";
 
 const emit = defineEmits([
   'deleteItem',
@@ -187,6 +203,7 @@ const emit = defineEmits([
 
 const userStore = useUserStore()
 
+const $q = useQuasar()
 const commonHelper = useCommonHelper()
 const isVendor = computed(() => userStore.user.user_type === 'vendor')
 
@@ -207,10 +224,11 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  isUpdatePassword: {
+    type: Boolean,
+    default: false
+  }
 });
-
-
-console.log(props.isTransactionHistory)
 
 const copyToClipboard = (string) => {
   commonHelper.copyToClipboard(string)

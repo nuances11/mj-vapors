@@ -320,19 +320,13 @@ const isAddMode = ref(false)
 const attributeRef = ref([])
 const attributeOptionRef = ref([])
 
-const testFn = (event) => {
-  console.log(event.target)
-}
-
 const fetchProductFormData = async (props) => {
-  console.log(props);
   let data = deepClone(props)
   form.value.id = data.id
   form.value.price = data.price
   form.value.name = data.product.name
   form.value.description = data.product.description
   form.value.attribute_options = data.attributes_options
-  console.log(data.attributes_options)
 
   return form.value
 }
@@ -350,7 +344,6 @@ const editProduct = async (props) => {
 }
 
 const submitForm = async () => {
-  console.log(isAddMode.value)
   if (isAddMode.value) await saveProduct()
   // else await updateProduct()
 }
@@ -376,7 +369,6 @@ const checkAttributeEntry = async () => {
 
 const saveProduct = async () => {
   const result = await productFormRef.value.validate();
-  console.log(result)
   if (!!!result) {
     return;
   }
@@ -441,8 +433,6 @@ const clearAttributeSelectionOptions = () => {
 }
 
 const getAttributeSelectionOptions = async (value) => {
-  console.log('attributeRef', attributeRef.value)
-  console.log('attributeOptionRef', attributeOptionRef.value)
   if (!value) return
   attributeSelectionOptionsLoading.value = true;
   let query = {};
@@ -519,7 +509,6 @@ watch(
 
     if (typeof oldValue !== 'undefined' || typeof value !== 'undefined') {
       let intersection = value.filter(x => oldValue.includes(x));
-      console.log('intersection', intersection)
     }
 
   },

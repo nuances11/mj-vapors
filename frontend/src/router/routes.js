@@ -65,6 +65,11 @@ const routes = [
         component: () => import('pages/Reports/TimeTracking.vue'),
         meta: { breadCrumb: "Time Tracking", isAdminOnly: true },
       },
+      {
+        path: '/profile',
+        component: () => import('pages/Users/ProfilePage.vue'),
+        meta: { breadCrumb: "Profile" },
+      },
     ],
     meta: {
       requiresAuth: true,

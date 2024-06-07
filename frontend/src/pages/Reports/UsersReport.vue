@@ -255,6 +255,7 @@
         :is-transaction-history="true"
         :is-transaction-report="true"
         @row-click="onRowClick"
+        :with-actions="false"
       />
     </div>
 
@@ -406,7 +407,6 @@ const clearUserData = () => {
 
 const generateUserReport = async () => {
   userReportData.value = await userRequest.generateUserReport(userReport.id, userReport);
-  console.log(userReportData);
 }
 const getUserDetails = async (value) => {
   if (!value) return
@@ -415,7 +415,6 @@ const getUserDetails = async (value) => {
   filters.user = data
   userReport.id = value.id
   userReport.transaction_date = null
-  console.log(data);
 
 }
 

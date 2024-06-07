@@ -43,6 +43,10 @@ export function useUserRequest() {
     });
   }
 
+  const updateUserPassword = (id, data) => {
+    return request.patch(api + "/update-password/" + id, data);
+  };
+
   return {
     getUsers,
     getUser,
@@ -51,6 +55,7 @@ export function useUserRequest() {
     deleteUser,
     checkUserPassword,
     generateUserReport,
-    getUserBranch
+    getUserBranch,
+    updateUserPassword
   }
 }

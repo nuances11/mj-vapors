@@ -189,6 +189,7 @@ const timeOutBtnDisable = computed(() => {
 
 
 const checkLogData = async () => {
+  if (!userStore.user.branch.id) return;
   if (userStore.user.user_type !== 'vendor') return;
   let query = {
     branch_id: userStore.user.branch.id,
@@ -196,7 +197,6 @@ const checkLogData = async () => {
   }
   const {data} = await timeTrackingRequest.checkLogData(query)
   userTimeData.value = data;
-  console.log(data);
 }
 
 const logTime = async (action) => {
@@ -224,7 +224,6 @@ const logTime = async (action) => {
   }).onOk(async () => {
     await timeTrackingRequest.logTime(logData)
       .then( async (response) => {
-        console.log(response)
         if (!response.success) {
           $q.notify({
             type: "negative",
@@ -257,8 +256,9 @@ const logTime = async (action) => {
   })
 }
 
-const showTimeInDialog = () => {
+const showTimeInDialog = async () => {
   if (userStore.user.user_type !== 'vendor') return;
+  await checkLogData()
   timeInDialog.value = true
 }
 

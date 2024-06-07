@@ -40,7 +40,6 @@ export const useSettingStore = defineStore('setting', () => {
   const setCompanySetting = (companyData) => {
     setting.company.company_name = companyData.company_name || null;
     setting.company.logo = companyData.logo || 'default-logo.png';
-    console.log('setCompanySetting', setting)
   }
 
   const setUserSetting = (userData) => {

@@ -125,6 +125,7 @@
       @edit-item="editUser"
       no-data-label="I didn't find anything for you"
       no-results-label="The filter didn't uncover any results"
+      :is-update-password="true"
     />
 
     <q-dialog
@@ -338,6 +339,38 @@
             <q-btn flat label="Submit" type="submit" color="primary" />
           </q-card-actions>
         </q-form>
+
+        <q-form v-if="!isAddMode" ref="changePasswordFormRef" @submit="changePassword">
+          <q-card-section>
+            <div class="text-h6">Change Password</div>
+          </q-card-section>
+          <q-card-section class="q-pt-none q-pb-none">
+            <q-input
+              dense
+              class="q-mb-md"
+              filled
+              v-model="changePasswordForm.password"
+              label="New Password *"
+              hint="Input Password"
+              lazy-rules
+              hide-bottom-space
+              :rules="[ val => val && val.length > 0 || 'Please type something', passwordLength]"
+            >
+              <template #append>
+                <q-icon
+                  class="cursor-pointer clickable-icons"
+                  name="content_copy"
+                  @click="copyToClipboard(changePasswordForm.password)"
+                >
+                  <q-tooltip>Copy to clipboard</q-tooltip>
+                </q-icon>
+              </template>
+            </q-input>
+          </q-card-section>
+          <q-card-actions align="right" class="q-pt-none">
+            <q-btn flat label="Change Password" type="submit" color="primary" />
+          </q-card-actions>
+        </q-form>
       </q-card>
     </q-dialog>
 
@@ -446,6 +479,10 @@ const deleteUserDialog = ref(false);
 const loading = ref(false);
 const branchOptions = ref([])
 const branchOptionsLoading = ref(false)
+const changePasswordFormRef = ref(null)
+const changePasswordForm = ref({
+  password: null,
+})
 
 const filters = reactive({
   status: null,
@@ -477,8 +514,25 @@ const deleteForm = ref({
   password: '',
 })
 
+const changePassword = async () => {
+  await userRequest.updateUserPassword(userForm.value.id, changePasswordForm.value)
+    .then((response) => {
+      if (response.success) {
+        $q.notify({
+          type: "positive",
+          message: response.message,
+        });
+        changePasswordForm.value.password = null
+      } else {
+        $q.notify({
+          type: "negative",
+          message: response.message,
+        });
+      }
+    })
+}
+
 const checkUserType = (value) => {
-  console.log(value);
   if (value !== 'branch_admin') userForm.value.branch_id = null
 }
 
@@ -691,7 +745,6 @@ const editUser = async (props) => {
   await getBranch()
   formTitle.value = 'Update User'
   userForm.value = commonHelper.deepClone(props)
-  // console.log('editUser', userForm.value)
   Object.assign(userForm.value, props)
   if (!userForm.value.commission)
     userForm.value.commission = await getDefaultUserSetting()
@@ -699,7 +752,6 @@ const editUser = async (props) => {
     userForm.value.commission =
       userForm.value.commission.settings ??
       await getDefaultUserSetting()
-  console.log(userForm.value)
   isAddMode.value = false;
   userFormDialog.value = true;
 }

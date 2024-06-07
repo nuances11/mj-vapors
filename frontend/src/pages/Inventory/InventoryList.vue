@@ -467,7 +467,6 @@ const getProducts = async (props) => {
 
   // const { data } = await productRequest.getProducts(query);
   const { data } = await listingRequest.getListings()
-  console.log(data);
   if (data) skusOptions.value = data
 };
 

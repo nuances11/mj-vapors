@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Acl;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserBranch;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class UserController extends BaseController
 {
@@ -86,6 +88,10 @@ class UserController extends BaseController
                 $branch = new UserBranch(['branch_id' => $request->branch_id]);
                 $user->branch()->save($branch);
             }
+
+            $role = Role::findByName($request->user_type);
+
+            $user->syncRoles($role);
 
 
             DB::commit();
@@ -193,5 +199,39 @@ class UserController extends BaseController
                             ->where('user_id', $id)
                             ->first();
         return $this->sendResponse($userBranch, 'User branch fetched.');
+    }
+
+    public function changePassword(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $user = User::findOrFail($id);
+            if ($request->profile_page) {
+                if(Hash::check($request->old_password, $user->password)) {
+                    $user->password = bcrypt($request->password);
+                    $user->save();
+                    DB::commit();
+                    return $this->sendResponse([], 'Password updated.');
+
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Password not matched.'
+                    ]);
+                }
+            } else {
+                if (Auth::user()->user_type === 'super_admin') {
+                    $user->password = bcrypt($request->password);
+                    $user->save();
+                }
+            }
+
+            DB::commit();
+            return $this->sendResponse([], 'Password updated.');
+
+        } catch(Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getMessage(), ['error' => $e->getMessage()], 500);
+        }
     }
 }

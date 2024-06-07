@@ -44,6 +44,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('time-trackings/log-time', [TimeTrackingController::class, 'logTime']);
     Route::get('time-trackings/check-log-data', [TimeTrackingController::class, 'checkLogData']);
     Route::get('users/{id}/branch', [UserController::class, 'getBranch']);
+    Route::patch('users/update-password/{id}', [UserController::class, 'changePassword']);
 
     Route::apiResource('users', UserController::class);
     Route::apiResource('branches', BranchController::class);

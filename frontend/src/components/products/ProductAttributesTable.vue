@@ -250,13 +250,9 @@ const closeForm = () => {
 const editAttribute = (attr) => {
   showProductAttributeFormDialog.value = true;
   let data = deepClone(attr)
-  console.log(data)
-  console.log(attr)
   form.value.id = data.id
   form.value.name = data.name
   form.value.options = data.attribute_options
-
-  console.log(form.value)
 
 }
 const getAttributeTableColumns = () => {

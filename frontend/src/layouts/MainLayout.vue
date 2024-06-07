@@ -35,13 +35,13 @@
           >
             <q-tooltip>Go Fullscreen</q-tooltip>
           </q-icon>
-          <q-btn round dense flat color="grey-8" icon="notifications">
-            <q-badge color="red" text-color="white" floating>
-              2
-            </q-badge>
-            <q-tooltip>Notifications</q-tooltip>
-          </q-btn>
-          <q-btn round flat>
+<!--          <q-btn round dense flat color="grey-8" icon="notifications">-->
+<!--            <q-badge color="red" text-color="white" floating>-->
+<!--              2-->
+<!--            </q-badge>-->
+<!--            <q-tooltip>Notifications</q-tooltip>-->
+<!--          </q-btn>-->
+          <q-btn @click.prevent="goToProfile" round flat>
             <q-avatar size="26px">
               <img src="https://cdn.quasar.dev/img/boy-avatar.png">
             </q-avatar>
@@ -260,6 +260,21 @@
             </q-item-section>
           </q-item>
 
+          <q-item
+            v-if="$q.screen.lt.md"
+            v-ripple
+            clickable
+            to="/profile"
+            class="text-subtitle1 color-white"
+          >
+            <q-item-section avatar>
+              <q-icon size="medium" name="account_circle" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Profile</q-item-label>
+            </q-item-section>
+          </q-item>
+
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -323,6 +338,7 @@ import {useSettingStore} from "stores/setting-store";
 import CompanyDetails from "components/header/CompanyDetails.vue";
 import ClockContainer from "components/time-clock/ClockContainer.vue";
 import {useUserRequest} from "src/composables/useUserRequest";
+import {useTimeTrackingRequest} from "src/composables/useTimeTrackingRequest";
 
 export default defineComponent({
   name: 'MainLayout',
@@ -338,12 +354,14 @@ export default defineComponent({
     const settingStore = useSettingStore()
     const userStore = useUserStore()
     const commonHelper = useCommonHelper()
+    const timeTrackingRequest = useTimeTrackingRequest()
     const settingRequest = useSettingRequest()
     const authRequest = useAuthenticationRequest()
     const authHelper = useAuthenticationHelper()
     const router = useRouter()
     const route = useRoute()
-    const first_name = Cookies.get('user_first_name');
+    // const first_name = Cookies.get('user_first_name');
+    const first_name = computed(() => userStore.user.first_name);
     const branchOptionsLoading = ref(false)
     const branchFormRef = ref(null)
     const branchOptions = ref([])
@@ -394,6 +412,10 @@ export default defineComponent({
 
     })
 
+    const goToProfile = () => {
+      router.push('/profile')
+    }
+
     const getUserBranch = async () => {
       if (userStore.user.user_type !== 'branch_admin') return
       const { data } = await userRequest.getUserBranch(userStore.user.id)
@@ -426,14 +448,29 @@ export default defineComponent({
       if (!!!result) {
         return;
       }
-      console.log(branchForm.value.branch)
       userStore.setUserBranch(branchForm.value.branch);
-      console.log(userStore.user)
+
       branchSelectorDialog.value = false;
     }
 
+    const checkLogData = async () => {
+      // if (!userStore.user.branch.id) return;
+      if (userStore.user.user_type !== 'vendor') return;
+      let query = {
+        branch_id: userStore.user.branch.id,
+        user_id: userStore.user.id,
+      }
+      return await timeTrackingRequest.checkLogData(query)
+    }
+
     async function checkBranch() {
-      console.log('checkBranch', userStore.user.branch)
+
+      let logData = await checkLogData()
+
+      if (logData.data) {
+        userStore.setUserBranch(logData.data.branch)
+        return;
+      }
       if (!userStore.user.branch || !userStore.user.branch.length > 0) {
         await getBranchOptions()
         branchSelectorDialog.value = true;
@@ -495,6 +532,7 @@ export default defineComponent({
       submitBranchForm,
       checkBranch,
       getUserBranch,
+      goToProfile,
       geCompanySettings,
       branchSelectorDialog,
       branchOptionsLoading,

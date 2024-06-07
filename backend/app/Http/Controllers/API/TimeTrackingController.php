@@ -89,7 +89,7 @@ class TimeTrackingController extends BaseController
     {
         $data = $request->all();
         $timeData = TimeTracking::where('user_id', $data['user_id'] ?? Auth::user()->id)
-                    ->where('branch_id', $data['branch_id'])
+//                    ->where('branch_id', $data['branch_id'])
                     ->whereDay('created_at', Carbon::now()->timezone('Asia/Manila')->day)
                     ->first();
 

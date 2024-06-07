@@ -180,7 +180,16 @@ const getUserOptions = async () => {
     display_all: true
   })
 
-  userOptions.value = data
+  let userData = data;
+
+  let vendors = [];
+
+  userData.forEach((e) => {
+    if(e.user_type === 'vendor')
+      vendors.push(e)
+  })
+
+  userOptions.value = vendors
 }
 
 const getCsvHeader = () => {

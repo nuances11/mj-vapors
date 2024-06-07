@@ -363,7 +363,6 @@ const checkLogData = async () => {
 
   const {data} = await timeTrackingRequest.checkLogData(query)
   userTimeData.value = data;
-  console.log(data);
 }
 
 const getUserBranch = async () => {
@@ -485,10 +484,6 @@ const refreshTransactionForm = () => {
   productOptions.value = []
   options.value = []
   productDefaultOptions.value = []
-
-  console.log('refreshTransactionForm productOptions', productOptions.value)
-  console.log('refreshTransactionForm options', options.value)
-  console.log('refreshTransactionForm productDefaultOptions', productDefaultOptions.value)
 }
 
 const addTransaction = () => {
@@ -522,7 +517,6 @@ const updatePrice = (item) => {
     cancel: true,
     persistent: true
   }).onOk(data => {
-    console.log('>>>> OK, received', data)
     item.price = parseFloat(data);
     item.sub_total = item.qty * item.price
   }).onCancel(() => {
@@ -545,7 +539,6 @@ const updateQuantity = (step, item) => {
     cancel: true,
     persistent: true
   }).onOk(data => {
-    console.log('>>>> OK, received', data)
     item.qty = parseInt(data);
     item.sub_total = item.qty * item.price
   }).onCancel(() => {
@@ -564,7 +557,6 @@ const clearData = () => {
 }
 
 const addProductToCart = (item, productAttributes) => {
-  console.log(item);
   let index = cartItem.value.findIndex(x => x.code === item.code);
 
   if (index === -1) {
@@ -602,7 +594,6 @@ const getAttributeLabel = (variant) => {
 }
 
 const showAttribute = async (value) => {
-  console.log(value);
   if (value) {
     // productAttributes.value = value
     let query = {};
@@ -666,7 +657,6 @@ onMounted(() => {
   let user = JSON.parse(LocalStorage.getItem("user"))
   if (user.user_type === 'vendor')
     getProductOptions()
-  console.log(user.user_type)
   if (user.user_type === 'branch_admin')
     getUserBranch()
 

@@ -45,6 +45,7 @@ export function useUserHelper() {
         label: "Actions",
         field: "actions",
         sortable: false,
+        headerStyle: 'width: auto',
       }
     ];
   };

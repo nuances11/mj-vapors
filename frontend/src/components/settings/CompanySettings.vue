@@ -181,10 +181,8 @@ const onFilesChange = (e) => {
     )
     .then((response) => {
       const ONE_SECOND = 1000;
-      console.log(response)
       profile.value = response.data.data;
       settingStore.setCompanySetting(response.data.data)
-      console.log(settingStore.setting.company)
       rand.value = new Date().getTime() / ONE_SECOND;
       bus.emit('company-setting-updated')
     })

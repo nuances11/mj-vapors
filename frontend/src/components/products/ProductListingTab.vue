@@ -397,7 +397,6 @@ const submitProductListingForm = async () => {
 
 const updateProductListing = async () => {
   const result = await productListingFormRef.value.validate();
-  console.log(result)
   if (!!!result) {
     return;
   }
@@ -429,7 +428,6 @@ const updateProductListing = async () => {
       });
 
   } catch (error) {
-    console.log(error?.response?.statusText)
     $q.notify({
       type: "negative",
       icon: 'report_problem',

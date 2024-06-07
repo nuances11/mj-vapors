@@ -207,7 +207,6 @@ const form = ref({
 })
 
 const deleteOption = (optionId, index) => {
-  console.log(optionId)
   loading.value = true
   $q.dialog({
     title: 'Delete Record',
